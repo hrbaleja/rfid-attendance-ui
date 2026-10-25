@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Radio, Users, Calendar, Settings, UserCheck, GraduationCap, Edit3, Shield, Wifi, WifiOff, CreditCard, BookOpen } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Radio, Users, Calendar, Settings, UserCheck, GraduationCap, Edit3, WifiOff, CreditCard, BookOpen, LogOut, User } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, isConnected, schoolName, onOpenManualModal }) {
+  const { user, logout } = useAuth();
   const [time, setTime] = useState(new Date().toLocaleTimeString());
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
         </div>
 
         {/* Live Status and Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div
             style={{
               display: 'flex',
@@ -77,7 +79,7 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
             }}
           >
             {isConnected ? <span className="pulse-dot"></span> : <WifiOff size={14} />}
-            {isConnected ? 'Gate Live (Socket.io Connected)' : 'Reconnecting...'}
+            {isConnected ? 'Gate Live' : 'Reconnecting...'}
           </div>
 
           <div
@@ -98,15 +100,53 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
             style={{
               backgroundColor: '#2563eb',
               color: '#fff',
-              padding: '8px 16px',
+              padding: '8px 14px',
               borderRadius: '8px',
               fontSize: '13px',
               fontWeight: '600'
             }}
           >
             <Edit3 size={15} />
-            Mark Manual Entry
+            Manual Entry
           </button>
+
+          {/* User Profile & Logout */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              paddingLeft: '10px',
+              borderLeft: '1px solid #e2e8f0'
+            }}
+          >
+            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '12.5px', fontWeight: '700', color: '#0f172a' }}>
+                {user?.name || 'Administrator'}
+              </span>
+              <span style={{ fontSize: '11px', color: '#64748b' }}>
+                {user?.email || 'admin@bgroup.com'}
+              </span>
+            </div>
+
+            <button
+              onClick={logout}
+              title="Sign Out"
+              style={{
+                backgroundColor: '#fef2f2',
+                color: '#dc2626',
+                border: '1px solid #fee2e2',
+                padding: '8px',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer'
+              }}
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
         </div>
       </div>
 

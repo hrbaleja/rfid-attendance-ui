@@ -14,8 +14,8 @@ export default function CardEnrollment({ config, onStudentAdded }) {
     gender: 'Boy',
     dob: '',
     parentName: '',
-    parentPhone: '9664759611',
-    parentEmail: 'hrbaleja.04@gmail.com'
+    parentPhone: '',
+    parentEmail: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -70,8 +70,8 @@ export default function CardEnrollment({ config, onStudentAdded }) {
           gender: 'Boy',
           dob: '',
           parentName: '',
-          parentPhone: '9664759611',
-          parentEmail: 'hrbaleja.04@gmail.com'
+          parentPhone: '',
+          parentEmail: ''
         });
         setDetectedUid('');
         fetchRecentStudents();

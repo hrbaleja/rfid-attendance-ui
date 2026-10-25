@@ -6,7 +6,7 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [testEmailLoading, setTestEmailLoading] = useState(false);
-  const [testEmailTarget, setTestEmailTarget] = useState('hrbaleja.04@gmail.com');
+  const [testEmailTarget, setTestEmailTarget] = useState('admin@bgroup.com');
   const [testEmailStatus, setTestEmailStatus] = useState(null);
 
   const handleSave = async (e) => {
@@ -305,6 +305,23 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
                   onChange={(e) => setConfig({ ...config, emailFromName: e.target.value })}
                 />
               </div>
+            </div>
+
+            {/* Optional Resend HTTPS API Key */}
+            <div style={{ marginTop: '12px' }}>
+              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#166534', marginBottom: '4px' }}>
+                Optional Resend HTTPS API Key (Recommended for Railway — Never blocked by cloud firewall)
+              </label>
+              <input
+                type="text"
+                placeholder="re_xxxxxxxxxxxxxxxxxxxx (Optional - Free at resend.com)"
+                style={{ width: '100%', fontSize: '13px', fontFamily: 'monospace' }}
+                value={config.resendApiKey || ''}
+                onChange={(e) => setConfig({ ...config, resendApiKey: e.target.value })}
+              />
+              <span style={{ fontSize: '11px', color: '#15803d', marginTop: '2px', display: 'block' }}>
+                💡 Cloud hosts like Railway block raw SMTP ports (465/587). Adding a free Resend key sends emails instantly over HTTPS (Port 443) with 0 timeout!
+              </span>
             </div>
 
             {/* Test Email Dispatcher */}

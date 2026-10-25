@@ -18,8 +18,8 @@ export default function StudentDirectory() {
     className: '9A',
     gender: 'Boy',
     parentName: '',
-    parentPhone: '9664759611',
-    parentEmail: 'hrbaleja.04@gmail.com'
+    parentPhone: '',
+    parentEmail: ''
   });
 
   // Bulk CSV Text Area
@@ -59,8 +59,8 @@ export default function StudentDirectory() {
           className: '9A',
           gender: 'Boy',
           parentName: '',
-          parentPhone: '9664759611',
-          parentEmail: 'hrbaleja.04@gmail.com'
+          parentPhone: '',
+          parentEmail: ''
         });
         fetchStudents();
       }

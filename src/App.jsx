@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import api from './api';
 import { socket } from './socket';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
+import LoginView from './components/LoginView';
 import Navbar from './components/Navbar';
 import LiveGateMonitor from './components/LiveGateMonitor';
 import DailyAttendance from './components/DailyAttendance';
@@ -13,7 +15,8 @@ import ManualAttendanceModal from './components/ManualAttendanceModal';
 import CardEnrollment from './components/CardEnrollment';
 import SetupGuide from './components/SetupGuide';
 
-export default function App() {
+function Dashboard() {
+  const { isAuthenticated, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('live');
   const [liveScans, setLiveScans] = useState([]);
   const [dailyData, setDailyData] = useState(null);
@@ -26,6 +29,8 @@ export default function App() {
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     fetchConfig();
     fetchDailyAttendance();
 
@@ -35,7 +40,6 @@ export default function App() {
 
     const onScan = (scan) => {
       setLiveScans((prev) => [scan, ...prev.slice(0, 19)]);
-      // Auto-refresh daily data when a scan arrives
       fetchDailyAttendance();
     };
 
@@ -48,12 +52,13 @@ export default function App() {
       socket.off('disconnect', onDisconnect);
       socket.off('NEW_ATTENDANCE_SCAN', onScan);
     };
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
+    if (!isAuthenticated) return;
     if (activeTab === 'daily') fetchDailyAttendance();
     if (activeTab === 'monthly') fetchMonthlyMatrix();
-  }, [activeTab, selectedDate, selectedMonth, selectedClass]);
+  }, [activeTab, selectedDate, selectedMonth, selectedClass, isAuthenticated]);
 
   const fetchConfig = async () => {
     try {
@@ -83,6 +88,21 @@ export default function App() {
       console.error('Failed to load monthly matrix:', err);
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div className="pulse-dot" style={{ width: '20px', height: '20px', backgroundColor: '#2563eb', margin: '0 auto 12px' }}></div>
+          <span style={{ fontSize: '14px', color: '#64748b', fontWeight: '600' }}>Authenticating Session...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginView />;
+  }
 
   return (
     <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '24px 20px' }}>
@@ -145,5 +165,13 @@ export default function App() {
         onRefresh={fetchDailyAttendance}
       />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Dashboard />
+    </AuthProvider>
   );
 }
