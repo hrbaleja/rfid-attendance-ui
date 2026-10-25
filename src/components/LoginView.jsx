@@ -25,8 +25,8 @@ export default function LoginView() {
   };
 
   const handleFillDemo = () => {
-    setEmail('admin@bgroup.com');
-    setPassword('123Bgroup@');
+    setEmail('');
+    setPassword('');
     setError(null);
   };
 
@@ -236,41 +236,7 @@ export default function LoginView() {
           </button>
         </form>
 
-        {/* Demo Credentials Quick-Fill helper */}
-        <div
-          style={{
-            marginTop: '24px',
-            padding: '12px 14px',
-            backgroundColor: '#f8fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '10px',
-            textAlign: 'center'
-          }}
-        >
-          <span style={{ fontSize: '11.5px', color: '#64748b', display: 'block', marginBottom: '6px' }}>
-            Default Initial System Credentials:
-          </span>
-          <code style={{ fontSize: '12px', fontWeight: '700', color: '#1e40af' }}>
-            admin@bgroup.com • 123Bgroup@
-          </code>
-          <div style={{ marginTop: '8px' }}>
-            <button
-              type="button"
-              onClick={handleFillDemo}
-              style={{
-                fontSize: '11.5px',
-                padding: '4px 10px',
-                backgroundColor: '#eff6ff',
-                color: '#2563eb',
-                borderRadius: '6px',
-                border: '1px solid #bfdbfe',
-                fontWeight: '600'
-              }}
-            >
-              Fill Credentials
-            </button>
-          </div>
-        </div>
+        
 
         {/* Footer Security Badge */}
         <div
