@@ -84,7 +84,8 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
       const res = await api.post('/api/config/test-email', { targetEmail: testEmailTarget });
       setTestEmailStatus({ success: true, message: res.data.message });
     } catch (e) {
-      setTestEmailStatus({ success: false, message: e.message });
+      const errMsg = e.response?.data?.message || e.message;
+      setTestEmailStatus({ success: false, message: errMsg });
     } finally {
       setTestEmailLoading(false);
     }
@@ -316,7 +317,7 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
                 </Box>
               </Stack>
 
-              {/* Gmail / Resend Email Alerts Box */}
+              {/* Gmail / Brevo / Resend Email Alerts Box */}
               <Paper
                 elevation={0}
                 sx={{
@@ -329,10 +330,10 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
                 <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: 2 }}>
                   <Box>
                     <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#166534' }}>
-                      📧 Gmail & Cloud Parent Email Alerts
+                      📧 Automated Parent Email Notifications
                     </Typography>
                     <Typography variant="caption" sx={{ color: '#15803d' }}>
-                      Sends instant HTML attendance report cards directly to parent inboxes.
+                      Sends instant HTML attendance report cards directly to parent inboxes upon scan.
                     </Typography>
                   </Box>
                   <FormControlLabel
@@ -347,13 +348,45 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
                   />
                 </Stack>
 
+                {/* Cloud Hosting Notice */}
+                <Alert severity="info" sx={{ mb: 2.5, fontSize: '0.8rem', bgcolor: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0' }}>
+                  <strong>Cloud Server Notice (Railway):</strong> Railway blocks raw SMTP ports (465/587). To ensure emails deliver seamlessly on Railway, enter a free <strong>Brevo API Key</strong> (<a href="https://brevo.com" target="_blank" rel="noreferrer" style={{ color: '#047857', fontWeight: 600 }}>brevo.com</a> - 300 free/day) or <strong>Resend API Key</strong> (<a href="https://resend.com" target="_blank" rel="noreferrer" style={{ color: '#047857', fontWeight: 600 }}>resend.com</a>) below. For local testing, Gmail SMTP works directly.
+                </Alert>
+
                 <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="password"
+                      label="Brevo (Sendinblue) API Key (Recommended for Cloud)"
+                      placeholder="xkeysib-..."
+                      value={config.brevoApiKey || ''}
+                      onChange={(e) => setConfig({ ...config, brevoApiKey: e.target.value })}
+                      helperText="Free 300 emails/day, no custom domain required"
+                      InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.85rem' } }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="password"
+                      label="Resend API Key (Alternative HTTPS API)"
+                      placeholder="re_..."
+                      value={config.resendApiKey || ''}
+                      onChange={(e) => setConfig({ ...config, resendApiKey: e.target.value })}
+                      helperText="Free 100 emails/day over HTTPS Port 443"
+                      InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.85rem' } }}
+                    />
+                  </Grid>
+
                   <Grid item xs={12} sm={4}>
                     <TextField
                       fullWidth
                       size="small"
                       type="email"
-                      label="Sender Gmail User"
+                      label="Sender Email / Gmail User"
                       value={config.smtpUser || ''}
                       onChange={(e) => setConfig({ ...config, smtpUser: e.target.value })}
                     />
@@ -363,10 +396,11 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
                       fullWidth
                       size="small"
                       type="password"
-                      label="Google App Password"
+                      label="Gmail App Password"
                       value={config.smtpPass || ''}
                       onChange={(e) => setConfig({ ...config, smtpPass: e.target.value })}
                       InputProps={{ sx: { fontFamily: 'monospace' } }}
+                      helperText="Used for local or unblocked SMTP delivery"
                     />
                   </Grid>
                   <Grid item xs={12} sm={4}>
@@ -381,37 +415,36 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
                 </Grid>
 
                 {/* Test Email Dispatcher */}
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="center" sx={{ mt: 2, pt: 1.5, borderTop: '1px solid #dcfce7' }}>
-                  <TextField
-                    size="small"
-                    placeholder="Enter test email address"
-                    value={testEmailTarget}
-                    onChange={(e) => setTestEmailTarget(e.target.value)}
-                    sx={{ width: { xs: '100%', sm: 260 } }}
-                  />
-                  <Button
-                    variant="contained"
-                    color="success"
-                    size="small"
-                    disabled={testEmailLoading}
-                    onClick={handleSendTestEmail}
-                    startIcon={<SendIcon />}
-                    sx={{ width: { xs: '100%', sm: 'auto' }, height: 38 }}
-                  >
-                    {testEmailLoading ? 'Sending...' : 'Send Test Email'}
-                  </Button>
-                  {testEmailStatus && (
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        fontWeight: 700,
-                        color: testEmailStatus.success ? 'success.dark' : 'error.main'
-                      }}
+                <Box sx={{ mt: 2.5, pt: 2, borderTop: '1px solid #dcfce7' }}>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="center">
+                    <TextField
+                      size="small"
+                      placeholder="Enter test email (e.g. hiteshbaleja@gmail.com)"
+                      value={testEmailTarget}
+                      onChange={(e) => setTestEmailTarget(e.target.value)}
+                      sx={{ width: { xs: '100%', sm: 340 } }}
+                    />
+                    <Button
+                      variant="contained"
+                      color="success"
+                      size="small"
+                      disabled={testEmailLoading}
+                      onClick={handleSendTestEmail}
+                      startIcon={<SendIcon />}
+                      sx={{ width: { xs: '100%', sm: 'auto' }, height: 38, px: 2.5 }}
                     >
-                      {testEmailStatus.success ? '✓ ' + testEmailStatus.message : '✗ ' + testEmailStatus.message}
-                    </Typography>
+                      {testEmailLoading ? 'Dispatching...' : 'Send Test Email'}
+                    </Button>
+                  </Stack>
+                  {testEmailStatus && (
+                    <Alert
+                      severity={testEmailStatus.success ? 'success' : 'error'}
+                      sx={{ mt: 1.5, fontSize: '0.82rem' }}
+                    >
+                      {testEmailStatus.message}
+                    </Alert>
                   )}
-                </Stack>
+                </Box>
               </Paper>
 
               <Button
