@@ -126,7 +126,7 @@ function Dashboard() {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 3 } }}>
+    <Container maxWidth={false} sx={{ maxWidth: '1440px', py: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 3 }, width: '100%' }}>
       {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}
@@ -137,13 +137,11 @@ function Dashboard() {
       />
 
       {/* Main Tab Content */}
-      <Box component="main">
+      <Box component="main" sx={{ width: '100%' }}>
         {activeTab === 'live' && (
           <LiveGateMonitor
             liveScans={liveScans}
             config={config}
-            onClearScans={() => setLiveScans([])}
-            onRefresh={fetchDailyAttendance}
           />
         )}
 

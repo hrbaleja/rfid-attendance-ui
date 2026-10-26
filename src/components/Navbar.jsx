@@ -12,8 +12,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Tabs,
-  Tab,
   Paper,
   Divider,
   Avatar,
@@ -60,18 +58,14 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
     { id: 'guide', label: 'Setup Guide', icon: MenuBookIcon }
   ];
 
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
-
   const handleMobileTabSelect = (tabId) => {
     setActiveTab(tabId);
     setMobileDrawerOpen(false);
   };
 
   return (
-    <Box component="header" sx={{ mb: 3 }}>
-      {/* Top Banner Card */}
+    <Box component="header" sx={{ mb: 3, width: '100%' }}>
+      {/* Top Branding Banner */}
       <Paper
         elevation={0}
         sx={{
@@ -83,7 +77,8 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
           justifyContent: 'space-between',
           gap: 2,
           borderRadius: 3,
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)',
+          width: '100%'
         }}
       >
         {/* Branding & Logo */}
@@ -227,7 +222,7 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
         )}
       </Paper>
 
-      {/* Desktop Navigation Tabs */}
+      {/* Desktop All-Visible Navigation Bar (No tabs hidden/clipped) */}
       {!isMobile && (
         <Paper
           elevation={0}
@@ -236,48 +231,44 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
             bgcolor: '#f1f5f9',
             borderRadius: 3,
             border: '1px solid',
-            borderColor: 'divider'
+            borderColor: 'divider',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 0.75,
+            width: '100%'
           }}
         >
-          <Tabs
-            value={activeTab}
-            onChange={handleTabChange}
-            variant="scrollable"
-            scrollButtons="auto"
-            allowScrollButtonsMobile
-            sx={{
-              minHeight: 44,
-              '& .MuiTabs-indicator': {
-                display: 'none'
-              },
-              '& .MuiTab-root': {
-                minHeight: 40,
-                px: 2,
-                py: 1,
-                borderRadius: 2,
-                color: 'text.secondary',
-                transition: 'all 0.2s',
-                '&.Mui-selected': {
-                  color: 'primary.main',
-                  bgcolor: '#ffffff',
-                  boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.08)'
-                }
-              }
-            }}
-          >
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Tab
-                  key={item.id}
-                  value={item.id}
-                  label={item.label}
-                  icon={<Icon sx={{ fontSize: 18 }} />}
-                  iconPosition="start"
-                />
-              );
-            })}
-          </Tabs>
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <Button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                startIcon={<Icon sx={{ fontSize: 18 }} />}
+                sx={{
+                  flex: '1 1 auto',
+                  minWidth: { xs: '130px', lg: 'auto' },
+                  py: 1,
+                  px: 1.5,
+                  fontSize: '0.825rem',
+                  fontWeight: isActive ? 700 : 500,
+                  bgcolor: isActive ? '#ffffff' : 'transparent',
+                  color: isActive ? 'primary.main' : 'text.secondary',
+                  boxShadow: isActive ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                  border: isActive ? '1px solid #e2e8f0' : '1px solid transparent',
+                  borderRadius: 2,
+                  whiteSpace: 'nowrap',
+                  '&:hover': {
+                    bgcolor: isActive ? '#ffffff' : 'rgba(255,255,255,0.7)',
+                    color: 'primary.main'
+                  }
+                }}
+              >
+                {item.label}
+              </Button>
+            );
+          })}
         </Paper>
       )}
 

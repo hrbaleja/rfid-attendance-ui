@@ -24,8 +24,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  InputAdornment,
-  Avatar
+  InputAdornment
 } from '@mui/material';
 import {
   PersonAdd as PersonAddIcon,
@@ -33,9 +32,7 @@ import {
   DeleteForever as DeleteIcon,
   Search as SearchIcon,
   School as SchoolIcon,
-  Close as CloseIcon,
-  Email as EmailIcon,
-  Phone as PhoneIcon
+  Close as CloseIcon
 } from '@mui/icons-material';
 
 export default function StudentDirectory() {
@@ -167,15 +164,17 @@ export default function StudentDirectory() {
   });
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Header & Action Bar */}
-      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+      {/* Header & Right-Aligned Action Bar */}
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, width: '100%' }}>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={2}
           alignItems={{ xs: 'stretch', md: 'center' }}
           justifyContent="space-between"
+          sx={{ width: '100%' }}
         >
+          {/* Left: Title & Subtitle */}
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
               <SchoolIcon sx={{ color: 'primary.main' }} /> Student Directory
@@ -185,10 +184,16 @@ export default function StudentDirectory() {
             </Typography>
           </Box>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="center">
+          {/* Right Side: Search, Bulk Import & Add Student Buttons */}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignItems="center"
+            sx={{ ml: { md: 'auto' } }}
+          >
             <TextField
               size="small"
-              placeholder="Search student, GR, UID..."
+              placeholder="Search student, GR..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               InputProps={{
@@ -198,7 +203,7 @@ export default function StudentDirectory() {
                   </InputAdornment>
                 )
               }}
-              sx={{ width: { xs: '100%', sm: 220 } }}
+              sx={{ width: { xs: '100%', sm: 200 } }}
             />
 
             <Button
@@ -206,7 +211,7 @@ export default function StudentDirectory() {
               color="primary"
               startIcon={<UploadFileIcon />}
               onClick={() => setIsBulkModalOpen(true)}
-              sx={{ width: { xs: '100%', sm: 'auto' }, height: 40 }}
+              sx={{ width: { xs: '100%', sm: 'auto' }, height: 40, whiteSpace: 'nowrap' }}
             >
               Bulk Import
             </Button>
@@ -216,7 +221,7 @@ export default function StudentDirectory() {
               color="primary"
               startIcon={<PersonAddIcon />}
               onClick={() => setIsAddModalOpen(true)}
-              sx={{ width: { xs: '100%', sm: 'auto' }, height: 40 }}
+              sx={{ width: { xs: '100%', sm: 'auto' }, height: 40, whiteSpace: 'nowrap', fontWeight: 700 }}
             >
               Add Student
             </Button>
@@ -225,9 +230,9 @@ export default function StudentDirectory() {
       </Paper>
 
       {/* Students Data Table */}
-      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden' }}>
-        <TableContainer sx={{ maxHeight: 650 }}>
-          <Table stickyHeader size="small">
+      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', width: '100%' }}>
+        <TableContainer sx={{ maxHeight: 650, width: '100%' }}>
+          <Table stickyHeader size="small" sx={{ width: '100%', minWidth: 850 }}>
             <TableHead>
               <TableRow>
                 <TableCell>GR No</TableCell>
@@ -238,7 +243,9 @@ export default function StudentDirectory() {
                 <TableCell>Gender</TableCell>
                 <TableCell>Parent Mobile</TableCell>
                 <TableCell>Parent Email</TableCell>
-                <TableCell align="center">Action</TableCell>
+                <TableCell align="right" sx={{ pr: 3 }}>
+                  Remove
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -273,12 +280,13 @@ export default function StudentDirectory() {
                     <TableCell>{st.gender}</TableCell>
                     <TableCell sx={{ fontFamily: 'monospace' }}>{st.parentPhone || '-'}</TableCell>
                     <TableCell>{st.parentEmail || '-'}</TableCell>
-                    <TableCell align="center">
+                    <TableCell align="right" sx={{ pr: 3 }}>
                       <IconButton
                         size="small"
                         color="error"
                         onClick={() => handleDelete(st._id, st.fullName)}
                         title="Delete Student"
+                        sx={{ bgcolor: '#fff1f2', '&:hover': { bgcolor: '#ffe4e6' } }}
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
@@ -291,7 +299,7 @@ export default function StudentDirectory() {
         </TableContainer>
       </Paper>
 
-      {/* Add Single Student MUI Dialog */}
+      {/* Add Single Student Dialog */}
       <Dialog
         open={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
@@ -421,7 +429,7 @@ export default function StudentDirectory() {
         </Box>
       </Dialog>
 
-      {/* Bulk Import MUI Dialog */}
+      {/* Bulk Import Dialog */}
       <Dialog
         open={isBulkModalOpen}
         onClose={() => setIsBulkModalOpen(false)}

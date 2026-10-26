@@ -18,16 +18,13 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  Grid
+  TextField
 } from '@mui/material';
 import {
   Badge as BadgeIcon,
   Add as AddIcon,
   DeleteForever as DeleteIcon,
-  Close as CloseIcon,
-  Phone as PhoneIcon,
-  Email as EmailIcon
+  Close as CloseIcon
 } from '@mui/icons-material';
 
 export default function TeacherDirectory() {
@@ -85,14 +82,15 @@ export default function TeacherDirectory() {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Header Card */}
-      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+      {/* Header Card with Right-Aligned Action Button */}
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, width: '100%' }}>
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
           alignItems={{ xs: 'flex-start', sm: 'center' }}
           justifyContent="space-between"
+          sx={{ width: '100%' }}
         >
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -108,7 +106,13 @@ export default function TeacherDirectory() {
             color="primary"
             startIcon={<AddIcon />}
             onClick={() => setIsModalOpen(true)}
-            sx={{ width: { xs: '100%', sm: 'auto' }, height: 40 }}
+            sx={{
+              ml: { sm: 'auto' },
+              width: { xs: '100%', sm: 'auto' },
+              height: 40,
+              fontWeight: 700,
+              whiteSpace: 'nowrap'
+            }}
           >
             Add Class Teacher
           </Button>
@@ -116,16 +120,18 @@ export default function TeacherDirectory() {
       </Paper>
 
       {/* Teachers Table */}
-      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden' }}>
-        <TableContainer sx={{ maxHeight: 600 }}>
-          <Table stickyHeader size="small">
+      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', width: '100%' }}>
+        <TableContainer sx={{ maxHeight: 600, width: '100%' }}>
+          <Table stickyHeader size="small" sx={{ width: '100%', minWidth: 700 }}>
             <TableHead>
               <TableRow>
                 <TableCell>Class</TableCell>
                 <TableCell>Teacher Full Name</TableCell>
                 <TableCell>Mobile Number (Alerts Recipient)</TableCell>
                 <TableCell>Email Address</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell align="right" sx={{ pr: 3 }}>
+                  Actions
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -150,12 +156,13 @@ export default function TeacherDirectory() {
                     <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>{t.teacherName}</TableCell>
                     <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{t.phone}</TableCell>
                     <TableCell>{t.email || '-'}</TableCell>
-                    <TableCell align="center">
+                    <TableCell align="right" sx={{ pr: 3 }}>
                       <IconButton
                         size="small"
                         color="error"
                         onClick={() => handleDelete(t._id, t.className)}
                         title="Delete Teacher"
+                        sx={{ bgcolor: '#fff1f2', '&:hover': { bgcolor: '#ffe4e6' } }}
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
@@ -168,7 +175,7 @@ export default function TeacherDirectory() {
         </TableContainer>
       </Paper>
 
-      {/* Assign Teacher MUI Dialog */}
+      {/* Assign Teacher Dialog */}
       <Dialog
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}

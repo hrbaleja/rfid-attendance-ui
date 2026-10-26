@@ -4,7 +4,6 @@ import {
   Box,
   Paper,
   Typography,
-  Grid,
   Stack,
   TextField,
   FormControl,
@@ -20,9 +19,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Avatar,
-  Divider,
-  useTheme
+  Avatar
 } from '@mui/material';
 import {
   FileDownload as DownloadIcon,
@@ -46,7 +43,6 @@ export default function DailyAttendance({
   setSelectedClass,
   onRefresh
 }) {
-  const theme = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [clearing, setClearing] = useState(false);
 
@@ -104,7 +100,8 @@ export default function DailyAttendance({
       r.emailStatus || 'SENT'
     ]);
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const csvContent =
+      'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -118,8 +115,8 @@ export default function DailyAttendance({
     const totalCount = stats.totalLogged || 0;
     const confirmPrompt = window.confirm(
       `⚠️ Clear Attendance for ${selectedDate}?\n\n` +
-      `Currently recorded: ${totalCount} record(s).\n\n` +
-      `This will DELETE all attendance records for this date so you can test fresh RFID card scans with your ESP32 hardware.`
+        `Currently recorded: ${totalCount} record(s).\n\n` +
+        `This will DELETE all attendance records for this date so you can perform fresh RFID test scans with your ESP32 hardware.`
     );
     if (!confirmPrompt) return;
 
@@ -172,16 +169,17 @@ export default function DailyAttendance({
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Responsive Filter and Action Bar */}
-      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+      {/* Full-Width Filter and Action Bar */}
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, width: '100%' }}>
         <Stack
           direction={{ xs: 'column', lg: 'row' }}
           spacing={2}
           alignItems={{ xs: 'stretch', lg: 'center' }}
           justifyContent="space-between"
+          sx={{ width: '100%' }}
         >
-          {/* Date & Class Selectors */}
+          {/* Left: Date & Class Selectors */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
             <TextField
               type="date"
@@ -220,8 +218,13 @@ export default function DailyAttendance({
             </FormControl>
           </Stack>
 
-          {/* Search & Actions */}
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="center">
+          {/* Right: Search, Export & Clear Actions */}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignItems="center"
+            sx={{ ml: { lg: 'auto' } }}
+          >
             <TextField
               size="small"
               placeholder="Search student, GR..."
@@ -234,7 +237,7 @@ export default function DailyAttendance({
                   </InputAdornment>
                 )
               }}
-              sx={{ width: { xs: '100%', sm: 240 } }}
+              sx={{ width: { xs: '100%', sm: 220 } }}
             />
 
             <Button
@@ -268,110 +271,112 @@ export default function DailyAttendance({
         </Stack>
       </Paper>
 
-      {/* Responsive Stat Metric Cards */}
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
-            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-              Total Logged Today
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'text.primary' }}>
-              {stats.totalLogged}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Total scans registered
-            </Typography>
-          </Paper>
-        </Grid>
+      {/* 4 Full-Width Metric Cards */}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(4, 1fr)' },
+          gap: 2,
+          width: '100%'
+        }}
+      >
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, width: '100%' }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+            Total Logged Today
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'text.primary' }}>
+            {stats.totalLogged}
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            Total scans registered
+          </Typography>
+        </Paper>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
-            <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>
-              Present On-Time
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'success.main' }}>
-              {stats.presentOnTime}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Arrived before gate cutoff
-            </Typography>
-          </Paper>
-        </Grid>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, width: '100%' }}>
+          <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>
+            Present On-Time
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'success.main' }}>
+            {stats.presentOnTime}
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            Arrived before gate cutoff
+          </Typography>
+        </Paper>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
-            <Typography variant="body2" sx={{ color: 'warning.main', fontWeight: 600 }}>
-              Present (Late)
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'warning.main' }}>
-              {stats.presentLate}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              Arrived after gate cutoff
-            </Typography>
-          </Paper>
-        </Grid>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, width: '100%' }}>
+          <Typography variant="body2" sx={{ color: 'warning.main', fontWeight: 600 }}>
+            Present (Late)
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'warning.main' }}>
+            {stats.presentLate}
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            Arrived after gate cutoff
+          </Typography>
+        </Paper>
 
-        <Grid item xs={12} sm={6} md={3}>
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
-            <Typography variant="body2" sx={{ color: 'error.main', fontWeight: 600 }}>
-              Absent Unlogged
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'error.main' }}>
-              {stats.absent}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              No RFID scan recorded
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, width: '100%' }}>
+          <Typography variant="body2" sx={{ color: 'error.main', fontWeight: 600 }}>
+            Absent Unlogged
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'error.main' }}>
+            {stats.absent}
+          </Typography>
+          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+            No RFID scan recorded
+          </Typography>
+        </Paper>
+      </Box>
 
       {/* Demographic Breakdown Row */}
-      <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
-          <Paper elevation={0} sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'info.50', color: 'info.main' }}>
-              <ManIcon />
-            </Avatar>
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                Boys: {stats.boys?.present || 0} Present / {stats.boys?.absent || 0} Absent
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                Total enrolled boys: {stats.boys?.total || 0}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+          gap: 2,
+          width: '100%'
+        }}
+      >
+        <Paper elevation={0} sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+          <Avatar sx={{ bgcolor: 'info.50', color: 'info.main' }}>
+            <ManIcon />
+          </Avatar>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              Boys: {stats.boys?.present || 0} Present / {stats.boys?.absent || 0} Absent
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              Total enrolled boys: {stats.boys?.total || 0}
+            </Typography>
+          </Box>
+        </Paper>
 
-        <Grid item xs={12} sm={6}>
-          <Paper elevation={0} sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'secondary.50', color: '#db2777' }}>
-              <WomanIcon />
-            </Avatar>
-            <Box>
-              <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                Girls: {stats.girls?.present || 0} Present / {stats.girls?.absent || 0} Absent
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                Total enrolled girls: {stats.girls?.total || 0}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
+        <Paper elevation={0} sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
+          <Avatar sx={{ bgcolor: 'secondary.50', color: '#db2777' }}>
+            <WomanIcon />
+          </Avatar>
+          <Box>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+              Girls: {stats.girls?.present || 0} Present / {stats.girls?.absent || 0} Absent
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              Total enrolled girls: {stats.girls?.total || 0}
+            </Typography>
+          </Box>
+        </Paper>
+      </Box>
 
-      {/* Responsive Records Table */}
-      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+      {/* Full-Width Records Table */}
+      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', width: '100%' }}>
         <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             Daily Attendance Records ({records.length})
           </Typography>
         </Box>
 
-        <TableContainer sx={{ maxHeight: 600 }}>
-          <Table stickyHeader size="small">
+        <TableContainer sx={{ width: '100%', maxHeight: 650, overflowX: 'auto' }}>
+          <Table stickyHeader size="small" sx={{ width: '100%', minWidth: 850 }}>
             <TableHead>
               <TableRow>
                 <TableCell>Time</TableCell>

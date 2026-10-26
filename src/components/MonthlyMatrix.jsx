@@ -80,15 +80,17 @@ export default function MonthlyMatrix({
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-      {/* Month & Class Controls */}
-      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3 }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
+      {/* Month & Class Controls Bar */}
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, width: '100%' }}>
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={2}
           alignItems={{ xs: 'stretch', md: 'center' }}
           justifyContent="space-between"
+          sx={{ width: '100%' }}
         >
+          {/* Left Side: Month & Class Selectors */}
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
             <TextField
               type="month"
@@ -127,7 +129,13 @@ export default function MonthlyMatrix({
             </FormControl>
           </Stack>
 
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="center">
+          {/* Right Side: Search & Download Button (Proper Right Aligned) */}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignItems="center"
+            sx={{ ml: { md: 'auto' } }}
+          >
             <TextField
               size="small"
               placeholder="Search student..."
@@ -140,15 +148,21 @@ export default function MonthlyMatrix({
                   </InputAdornment>
                 )
               }}
-              sx={{ width: { xs: '100%', sm: 200 } }}
+              sx={{ width: { xs: '100%', sm: 220 } }}
             />
 
             <Button
-              variant="outlined"
-              color="inherit"
+              variant="contained"
+              color="primary"
               startIcon={<DownloadIcon />}
               onClick={exportMonthlyCSV}
-              sx={{ width: { xs: '100%', sm: 'auto' }, borderColor: 'divider', height: 40 }}
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                height: 40,
+                px: 2.25,
+                fontWeight: 700,
+                whiteSpace: 'nowrap'
+              }}
             >
               Export Monthly CSV
             </Button>
@@ -157,7 +171,7 @@ export default function MonthlyMatrix({
       </Paper>
 
       {/* Monthly Attendance Spreadsheet Table */}
-      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', width: '100%' }}>
         <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
             Monthly Attendance Matrix ({selectedMonth})
@@ -169,8 +183,8 @@ export default function MonthlyMatrix({
           </Typography>
         </Box>
 
-        <TableContainer sx={{ maxHeight: 650, overflowX: 'auto' }}>
-          <Table stickyHeader size="small">
+        <TableContainer sx={{ maxHeight: 650, overflowX: 'auto', width: '100%' }}>
+          <Table stickyHeader size="small" sx={{ minWidth: 1000, width: '100%' }}>
             <TableHead>
               <TableRow>
                 <TableCell sx={{ minWidth: 90, bgcolor: '#f8fafc' }}>GR No</TableCell>

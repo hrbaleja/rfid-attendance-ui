@@ -108,11 +108,18 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
   }
 
   return (
-    <Grid container spacing={3}>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', lg: '1fr 340px' },
+        gap: 3,
+        width: '100%',
+        alignItems: 'start'
+      }}
+    >
       {/* Settings Form Column */}
-      <Grid item xs={12} lg={8}>
-        <Paper elevation={0} sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 800 }}>
+      <Paper elevation={0} sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3, width: '100%' }}>
+        <Typography variant="h6" sx={{ fontWeight: 800 }}>
             School Configuration & Cutoff Timings
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
@@ -420,13 +427,11 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
             </Stack>
           </Box>
         </Paper>
-      </Grid>
 
       {/* Right Column: Actions & Device Key */}
-      <Grid item xs={12} lg={4}>
-        <Stack spacing={2.5}>
-          {/* Manual Cron Trigger Card */}
-          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
+      <Stack spacing={2.5} sx={{ width: '100%' }}>
+        {/* Manual Cron Trigger Card */}
+        <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3, width: '100%' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
               <BoltIcon sx={{ color: 'warning.main', fontSize: 20 }} /> Manual Report Trigger
             </Typography>
@@ -485,7 +490,6 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
             </Typography>
           </Paper>
         </Stack>
-      </Grid>
-    </Grid>
+    </Box>
   );
 }
