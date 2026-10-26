@@ -178,7 +178,7 @@ export default function MonthlyMatrix({
             spacing={1.5}
             alignItems="center"
             sx={{
-              ml: { md: 'auto' },
+              ml: 'auto',
               width: { xs: '100%', sm: 'auto' },
               justifyContent: { xs: 'stretch', sm: 'flex-end' },
               flexShrink: 0
@@ -205,15 +205,45 @@ export default function MonthlyMatrix({
 
       {/* Monthly Attendance Spreadsheet Table */}
       <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden', width: '100%' }}>
-        <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-            Monthly Attendance Matrix ({selectedMonth})
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.2 }}>
-            Legend: <strong style={{ color: '#16a34a' }}>P</strong> = Present (On-Time),{' '}
-            <strong style={{ color: '#d97706' }}>L</strong> = Present (Late),{' '}
-            <strong style={{ color: '#dc2626' }}>A</strong> = Absent
-          </Typography>
+        <Box
+          sx={{
+            p: 2,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+            alignItems: { xs: 'flex-start', sm: 'center' },
+            gap: 1.5
+          }}
+        >
+          <Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Monthly Attendance Matrix ({selectedMonth})
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 0.2 }}>
+              Legend: <strong style={{ color: '#16a34a' }}>P</strong> = Present (On-Time),{' '}
+              <strong style={{ color: '#d97706' }}>L</strong> = Present (Late),{' '}
+              <strong style={{ color: '#dc2626' }}>A</strong> = Absent
+            </Typography>
+          </Box>
+
+          <Button
+            variant="outlined"
+            size="small"
+            color="primary"
+            startIcon={<DownloadIcon />}
+            onClick={exportMonthlyCSV}
+            sx={{
+              height: 36,
+              px: 2,
+              fontWeight: 700,
+              whiteSpace: 'nowrap',
+              ml: { sm: 'auto' }
+            }}
+          >
+            Export CSV
+          </Button>
         </Box>
 
         <TableContainer sx={{ maxHeight: 650, overflowX: 'auto', width: '100%' }}>

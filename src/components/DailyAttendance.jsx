@@ -267,7 +267,7 @@ export default function DailyAttendance({
             spacing={1.5}
             alignItems="center"
             sx={{
-              ml: { md: 'auto' },
+              ml: 'auto',
               width: { xs: '100%', sm: 'auto' },
               justifyContent: { xs: 'stretch', sm: 'flex-end' },
               flexShrink: 0
