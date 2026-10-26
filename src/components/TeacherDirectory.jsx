@@ -1,6 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
-import { UserCheck, Plus, Trash2, X } from 'lucide-react';
+import {
+  Box,
+  Paper,
+  Typography,
+  Stack,
+  Button,
+  IconButton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Grid
+} from '@mui/material';
+import {
+  Badge as BadgeIcon,
+  Add as AddIcon,
+  DeleteForever as DeleteIcon,
+  Close as CloseIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon
+} from '@mui/icons-material';
 
 export default function TeacherDirectory() {
   const [teachers, setTeachers] = useState([]);
@@ -47,7 +75,7 @@ export default function TeacherDirectory() {
   };
 
   const handleDelete = async (id, className) => {
-    if (!confirm(`Remove teacher assignment for Class ${className}?`)) return;
+    if (!window.confirm(`Remove teacher assignment for Class ${className}?`)) return;
     try {
       await api.delete(`/api/teachers/${id}`);
       fetchTeachers();
@@ -57,145 +85,157 @@ export default function TeacherDirectory() {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div className="card" style={{ padding: '18px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <h2 style={{ fontSize: '18px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <UserCheck size={22} color="#2563eb" /> Class Teachers Directory ({teachers.length})
-          </h2>
-          <p style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
-            Class Teachers receive daily and monthly attendance reports via SMS/WhatsApp.
-          </p>
-        </div>
-
-        <button
-          onClick={() => setIsModalOpen(true)}
-          style={{
-            backgroundColor: '#2563eb',
-            color: '#fff',
-            padding: '9px 16px',
-            borderRadius: '8px',
-            fontSize: '13px',
-            fontWeight: '600'
-          }}
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Header Card */}
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3 }}>
+        <Stack
+          direction={{ xs: 'column', sm: 'row' }}
+          spacing={2}
+          alignItems={{ xs: 'flex-start', sm: 'center' }}
+          justifyContent="space-between"
         >
-          <Plus size={15} /> Add / Update Class Teacher
-        </button>
-      </div>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <BadgeIcon sx={{ color: 'primary.main' }} /> Class Teachers Directory ({teachers.length})
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
+              Class Teachers receive automated daily & monthly attendance summaries via SMS & WhatsApp.
+            </Typography>
+          </Box>
 
-      <div className="card" style={{ overflow: 'hidden' }}>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Class</th>
-              <th>Teacher Name</th>
-              <th>Mobile Number (Receives Reports)</th>
-              <th>Email</th>
-              <th style={{ textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', padding: '30px' }}>Loading...</td></tr>
-            ) : teachers.length === 0 ? (
-              <tr><td colSpan="5" style={{ textAlign: 'center', padding: '30px', color: '#94a3b8' }}>No class teachers assigned yet.</td></tr>
-            ) : (
-              teachers.map((t) => (
-                <tr key={t._id}>
-                  <td><span className="badge badge-rfid" style={{ fontSize: '13px' }}>Class {t.className}</span></td>
-                  <td style={{ fontWeight: '600', color: '#0f172a' }}>{t.teacherName}</td>
-                  <td style={{ fontWeight: '600' }}>{t.phone}</td>
-                  <td>{t.email || '-'}</td>
-                  <td style={{ textAlign: 'right' }}>
-                    <button
-                      onClick={() => handleDelete(t._id, t.className)}
-                      style={{ background: 'none', color: '#dc2626', padding: '6px' }}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => setIsModalOpen(true)}
+            sx={{ width: { xs: '100%', sm: 'auto' }, height: 40 }}
+          >
+            Add Class Teacher
+          </Button>
+        </Stack>
+      </Paper>
 
-      {isModalOpen && (
-        <div className="modal-overlay">
-          <div className="card" style={{ width: '480px', padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: '700' }}>Assign Class Teacher</h3>
-              <button onClick={() => setIsModalOpen(false)} style={{ background: 'none' }}><X size={20} color="#94a3b8" /></button>
-            </div>
+      {/* Teachers Table */}
+      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+        <TableContainer sx={{ maxHeight: 600 }}>
+          <Table stickyHeader size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Class</TableCell>
+                <TableCell>Teacher Full Name</TableCell>
+                <TableCell>Mobile Number (Alerts Recipient)</TableCell>
+                <TableCell>Email Address</TableCell>
+                <TableCell align="center">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                    Loading assigned teachers...
+                  </TableCell>
+                </TableRow>
+              ) : teachers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                    No class teachers assigned yet.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                teachers.map((t) => (
+                  <TableRow key={t._id} hover>
+                    <TableCell>
+                      <Chip label={`Class ${t.className}`} size="small" variant="outlined" sx={{ fontWeight: 700 }} />
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>{t.teacherName}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{t.phone}</TableCell>
+                    <TableCell>{t.email || '-'}</TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(t._id, t.className)}
+                        title="Delete Teacher"
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
 
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Class Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. 9A, 10B"
-                  style={{ width: '100%' }}
-                  value={form.className}
-                  onChange={(e) => setForm({ ...form, className: e.target.value.toUpperCase() })}
-                />
-              </div>
+      {/* Assign Teacher MUI Dialog */}
+      <Dialog
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6" sx={{ fontWeight: 800 }}>
+            Assign Class Teacher
+          </Typography>
+          <IconButton onClick={() => setIsModalOpen(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <Box component="form" onSubmit={handleSubmit}>
+          <DialogContent dividers>
+            <Stack spacing={2.5}>
+              <TextField
+                fullWidth
+                size="small"
+                required
+                label="Class Name"
+                placeholder="e.g. 9A, 10B"
+                value={form.className}
+                onChange={(e) => setForm({ ...form, className: e.target.value.toUpperCase() })}
+              />
 
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Teacher Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Teacher Full Name"
-                  style={{ width: '100%' }}
-                  value={form.teacherName}
-                  onChange={(e) => setForm({ ...form, teacherName: e.target.value })}
-                />
-              </div>
+              <TextField
+                fullWidth
+                size="small"
+                required
+                label="Teacher Full Name"
+                placeholder="Teacher Full Name"
+                value={form.teacherName}
+                onChange={(e) => setForm({ ...form, teacherName: e.target.value })}
+              />
 
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Teacher Mobile (10-Digit) *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="9876543210"
-                  style={{ width: '100%' }}
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-              </div>
+              <TextField
+                fullWidth
+                size="small"
+                required
+                label="Teacher Mobile (10-Digit)"
+                placeholder="9876543210"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
 
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Email Address (Optional)</label>
-                <input
-                  type="email"
-                  placeholder="teacher@school.edu.in"
-                  style={{ width: '100%' }}
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '12px' }}>
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '9px 16px', borderRadius: '8px' }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  style={{ backgroundColor: '#2563eb', color: '#fff', padding: '9px 18px', borderRadius: '8px', fontWeight: '600' }}
-                >
-                  Save Teacher
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+              <TextField
+                fullWidth
+                size="small"
+                label="Teacher Email (Optional)"
+                type="email"
+                placeholder="teacher@example.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+            </Stack>
+          </DialogContent>
+          <DialogActions sx={{ p: 2 }}>
+            <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
+            <Button type="submit" variant="contained">
+              Save Assignment
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
+    </Box>
   );
 }

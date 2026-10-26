@@ -1,6 +1,30 @@
 import React, { useState } from 'react';
 import api from '../api';
-import { X, Send, CheckCircle2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Box,
+  Typography,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
+  Button,
+  IconButton,
+  Alert,
+  Stack,
+  Grid
+} from '@mui/material';
+import {
+  Close as CloseIcon,
+  Send as SendIcon,
+  EditNote as EditNoteIcon
+} from '@mui/icons-material';
 
 export default function ManualAttendanceModal({ isOpen, onClose, onRefresh }) {
   const [form, setForm] = useState({
@@ -40,127 +64,119 @@ export default function ManualAttendanceModal({ isOpen, onClose, onRefresh }) {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="card" style={{ width: '520px', padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div>
-            <h3 style={{ fontSize: '18px', fontWeight: '700' }}>Mark / Override Attendance Manually</h3>
-            <p style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>
-              Records attendance in MongoDB Atlas and dispatches parent alert.
-            </p>
-          </div>
-          <button onClick={onClose} style={{ background: 'none' }}><X size={20} color="#94a3b8" /></button>
-        </div>
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{ sx: { borderRadius: 3 } }}
+    >
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="h6" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <EditNoteIcon sx={{ color: 'primary.main' }} /> Mark Attendance Manually
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
+            Records attendance in MongoDB and optionally dispatches parent alert.
+          </Typography>
+        </Box>
+        <IconButton onClick={onClose} size="small">
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
 
-        {resultMsg && (
-          <div
-            style={{
-              padding: '10px 14px',
-              borderRadius: '8px',
-              marginBottom: '14px',
-              backgroundColor: resultMsg.type === 'success' ? '#ecfdf5' : '#fef2f2',
-              color: resultMsg.type === 'success' ? '#059669' : '#dc2626',
-              fontSize: '13px',
-              fontWeight: '600'
-            }}
-          >
-            {resultMsg.text}
-          </div>
-        )}
+      <Box component="form" onSubmit={handleSubmit}>
+        <DialogContent dividers>
+          {resultMsg && (
+            <Alert severity={resultMsg.type} sx={{ mb: 2.5, borderRadius: 2 }}>
+              {resultMsg.text}
+            </Alert>
+          )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
-              Student GR Number or RFID UID *
-            </label>
-            <input
-              type="text"
+          <Stack spacing={2.5}>
+            <TextField
+              fullWidth
+              size="small"
               required
+              label="Student GR Number or RFID UID"
               placeholder="e.g. GR1001 or E1F2A3B4"
-              style={{ width: '100%' }}
               value={form.identifier}
               onChange={(e) => setForm({ ...form, identifier: e.target.value })}
             />
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Status *</label>
-              <select
-                style={{ width: '100%' }}
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
-              >
-                <option value="Present">Present (On-Time)</option>
-                <option value="Present (Late)">Present (Late)</option>
-                <option value="Absent">Absent</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Reporting Time *</label>
-              <input
-                type="text"
-                required
-                style={{ width: '100%' }}
-                value={form.time}
-                onChange={(e) => setForm({ ...form, time: e.target.value })}
-              />
-            </div>
-          </div>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Attendance Status</InputLabel>
+                  <Select
+                    label="Attendance Status"
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  >
+                    <MenuItem value="Present">Present (On-Time)</MenuItem>
+                    <MenuItem value="Present (Late)">Present (Late)</MenuItem>
+                    <MenuItem value="Absent">Absent</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Date</label>
-            <input
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  size="small"
+                  required
+                  label="Reporting Time (HH:mm:ss)"
+                  value={form.time}
+                  onChange={(e) => setForm({ ...form, time: e.target.value })}
+                />
+              </Grid>
+            </Grid>
+
+            <TextField
+              fullWidth
+              size="small"
               type="date"
-              style={{ width: '100%' }}
+              label="Date"
               value={form.date}
               onChange={(e) => setForm({ ...form, date: e.target.value })}
+              InputLabelProps={{ shrink: true }}
             />
-          </div>
 
-          <div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
-              <input
-                type="checkbox"
-                checked={form.send_sms}
-                onChange={(e) => setForm({ ...form, send_sms: e.target.checked })}
-              />
-              Send Alert to Parent (Fast2SMS & WhatsApp)
-            </label>
-          </div>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={form.send_sms}
+                  onChange={(e) => setForm({ ...form, send_sms: e.target.checked })}
+                  color="primary"
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  Send Instant Alert to Parent (SMS & WhatsApp)
+                </Typography>
+              }
+            />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
-              Optional One-Time Custom Message Override:
-            </label>
-            <textarea
-              rows="3"
-              placeholder="Leave blank to use default template, or write custom text here..."
-              style={{ width: '100%', fontSize: '13px' }}
+            <TextField
+              fullWidth
+              multiline
+              rows={3}
+              size="small"
+              label="Optional Custom Message Override"
+              placeholder="Leave blank to use default template, or write custom note here..."
               value={form.custom_message}
               onChange={(e) => setForm({ ...form, custom_message: e.target.value })}
             />
-          </div>
+          </Stack>
+        </DialogContent>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '9px 16px', borderRadius: '8px' }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              style={{ backgroundColor: '#2563eb', color: '#fff', padding: '9px 18px', borderRadius: '8px', fontWeight: '600' }}
-            >
-              <Send size={15} />
-              {loading ? 'Recording...' : 'Record & Send Alert'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button type="submit" variant="contained" disabled={loading} endIcon={<SendIcon />}>
+            {loading ? 'Recording...' : 'Record & Send Alert'}
+          </Button>
+        </DialogActions>
+      </Box>
+    </Dialog>
   );
 }

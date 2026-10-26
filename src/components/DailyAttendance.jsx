@@ -1,6 +1,42 @@
 import React, { useState } from 'react';
-import { Download, Search, Filter, Calendar as CalendarIcon, Mail, Phone, Trash2 } from 'lucide-react';
 import api from '../api';
+import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Stack,
+  TextField,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
+  InputAdornment,
+  Button,
+  Chip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Avatar,
+  Divider,
+  useTheme
+} from '@mui/material';
+import {
+  FileDownload as DownloadIcon,
+  DeleteForever as DeleteIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon,
+  CalendarToday as CalendarIcon,
+  CheckCircle as CheckCircleIcon,
+  Schedule as ScheduleIcon,
+  Cancel as CancelIcon,
+  People as PeopleIcon,
+  Man as ManIcon,
+  Woman as WomanIcon
+} from '@mui/icons-material';
 
 export default function DailyAttendance({
   dailyData,
@@ -10,6 +46,7 @@ export default function DailyAttendance({
   setSelectedClass,
   onRefresh
 }) {
+  const theme = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [clearing, setClearing] = useState(false);
 
@@ -36,7 +73,21 @@ export default function DailyAttendance({
 
   const exportCSV = () => {
     if (records.length === 0) return alert('No records to export');
-    const headers = ['Date', 'Time', 'GR_No', 'Roll_No', 'Full_Name', 'Class', 'Gender', 'Parent_Email', 'Status', 'Method', 'Parent_Phone', 'SMS_Status', 'Email_Status'];
+    const headers = [
+      'Date',
+      'Time',
+      'GR_No',
+      'Roll_No',
+      'Full_Name',
+      'Class',
+      'Gender',
+      'Parent_Email',
+      'Status',
+      'Method',
+      'Parent_Phone',
+      'SMS_Status',
+      'Email_Status'
+    ];
     const rows = records.map((r) => [
       r.date,
       r.time,
@@ -68,7 +119,7 @@ export default function DailyAttendance({
     const confirmPrompt = window.confirm(
       `⚠️ Clear Attendance for ${selectedDate}?\n\n` +
       `Currently recorded: ${totalCount} record(s).\n\n` +
-      `This will DELETE all attendance records for ${selectedDate} so you can perform fresh RFID test scans with your ESP32 hardware.`
+      `This will DELETE all attendance records for this date so you can test fresh RFID card scans with your ESP32 hardware.`
     );
     if (!confirmPrompt) return;
 
@@ -86,226 +137,299 @@ export default function DailyAttendance({
     }
   };
 
+  const getStatusChip = (status) => {
+    if (status === 'Present') {
+      return (
+        <Chip
+          icon={<CheckCircleIcon sx={{ fontSize: '14px !important' }} />}
+          label="Present"
+          size="small"
+          color="success"
+          sx={{ fontWeight: 700, fontSize: '0.75rem', px: 0.5 }}
+        />
+      );
+    }
+    if (status === 'Present (Late)') {
+      return (
+        <Chip
+          icon={<ScheduleIcon sx={{ fontSize: '14px !important' }} />}
+          label="Late"
+          size="small"
+          color="warning"
+          sx={{ fontWeight: 700, fontSize: '0.75rem', px: 0.5 }}
+        />
+      );
+    }
+    return (
+      <Chip
+        icon={<CancelIcon sx={{ fontSize: '14px !important' }} />}
+        label="Absent"
+        size="small"
+        color="error"
+        sx={{ fontWeight: 700, fontSize: '0.75rem', px: 0.5 }}
+      />
+    );
+  };
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Filter and Export Bar */}
-      <div className="card" style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <CalendarIcon size={16} color="#64748b" />
-            <span style={{ fontSize: '13.5px', fontWeight: '600' }}>Date:</span>
-            <input
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Responsive Filter and Action Bar */}
+      <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3 }}>
+        <Stack
+          direction={{ xs: 'column', lg: 'row' }}
+          spacing={2}
+          alignItems={{ xs: 'stretch', lg: 'center' }}
+          justifyContent="space-between"
+        >
+          {/* Date & Class Selectors */}
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+            <TextField
               type="date"
+              size="small"
+              label="Attendance Date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <CalendarIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ width: { xs: '100%', sm: 200 } }}
             />
-          </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Filter size={16} color="#64748b" />
-            <span style={{ fontSize: '13.5px', fontWeight: '600' }}>Class:</span>
-            <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
-              <option value="">All Classes</option>
-              <option value="9A">Class 9A</option>
-              <option value="10A">Class 10A</option>
-            </select>
-          </div>
-        </div>
+            <FormControl size="small" sx={{ width: { xs: '100%', sm: 160 } }}>
+              <InputLabel id="class-select-label">Class</InputLabel>
+              <Select
+                labelId="class-select-label"
+                value={selectedClass}
+                label="Class"
+                onChange={(e) => setSelectedClass(e.target.value)}
+                startAdornment={
+                  <InputAdornment position="start">
+                    <FilterIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                  </InputAdornment>
+                }
+              >
+                <MenuItem value="">All Classes</MenuItem>
+                <MenuItem value="9A">Class 9A</MenuItem>
+                <MenuItem value="10A">Class 10A</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{ position: 'relative' }}>
-            <Search size={15} color="#94a3b8" style={{ position: 'absolute', left: '10px', top: '10px' }} />
-            <input
-              type="text"
-              placeholder="Search student, GR, or email..."
+          {/* Search & Actions */}
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="center">
+            <TextField
+              size="small"
+              placeholder="Search student, GR..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ paddingLeft: '32px', width: '240px' }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                  </InputAdornment>
+                )
+              }}
+              sx={{ width: { xs: '100%', sm: 240 } }}
             />
-          </div>
 
-          <button
-            onClick={exportCSV}
-            style={{
-              backgroundColor: '#f1f5f9',
-              color: '#334155',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              fontSize: '13px'
-            }}
-          >
-            <Download size={15} /> Export CSV
-          </button>
+            <Button
+              variant="outlined"
+              color="inherit"
+              startIcon={<DownloadIcon />}
+              onClick={exportCSV}
+              sx={{ width: { xs: '100%', sm: 'auto' }, borderColor: 'divider', height: 40 }}
+            >
+              Export CSV
+            </Button>
 
-          <button
-            onClick={handleClearDayAttendance}
-            disabled={clearing}
-            title={`Clear attendance for ${selectedDate} to test fresh RFID card scans`}
-            style={{
-              backgroundColor: '#fff1f2',
-              color: '#e11d48',
-              border: '1px solid #fecdd3',
-              padding: '8px 14px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: '600',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              cursor: clearing ? 'not-allowed' : 'pointer',
-              opacity: clearing ? 0.7 : 1,
-              transition: 'all 0.2s'
-            }}
-          >
-            <Trash2 size={15} />
-            {clearing ? 'Clearing...' : 'Clear Day (Testing)'}
-          </button>
-        </div>
-      </div>
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleClearDayAttendance}
+              disabled={clearing}
+              sx={{
+                width: { xs: '100%', sm: 'auto' },
+                bgcolor: '#fff1f2',
+                color: '#e11d48',
+                border: '1px solid #fecdd3',
+                height: 40,
+                '&:hover': { bgcolor: '#ffe4e6' }
+              }}
+            >
+              {clearing ? 'Clearing...' : 'Clear Day (Testing)'}
+            </Button>
+          </Stack>
+        </Stack>
+      </Paper>
 
-      {/* Metric Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
-        <div className="card" style={{ padding: '18px 20px' }}>
-          <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Total Logged Today</span>
-          <div style={{ fontSize: '28px', fontWeight: '800', color: '#0f172a', marginTop: '6px' }}>
-            {stats.totalLogged}
-          </div>
-        </div>
+      {/* Responsive Stat Metric Cards */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+              Total Logged Today
+            </Typography>
+            <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'text.primary' }}>
+              {stats.totalLogged}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              Total scans registered
+            </Typography>
+          </Paper>
+        </Grid>
 
-        <div className="card" style={{ padding: '18px 20px' }}>
-          <span style={{ fontSize: '13px', color: '#16a34a', fontWeight: '500' }}>Present (On-Time)</span>
-          <div style={{ fontSize: '28px', fontWeight: '800', color: '#16a34a', marginTop: '6px' }}>
-            {stats.presentOnTime}
-          </div>
-        </div>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
+            <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 600 }}>
+              Present On-Time
+            </Typography>
+            <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'success.main' }}>
+              {stats.presentOnTime}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              Arrived before gate cutoff
+            </Typography>
+          </Paper>
+        </Grid>
 
-        <div className="card" style={{ padding: '18px 20px' }}>
-          <span style={{ fontSize: '13px', color: '#d97706', fontWeight: '500' }}>Present (Late)</span>
-          <div style={{ fontSize: '28px', fontWeight: '800', color: '#d97706', marginTop: '6px' }}>
-            {stats.presentLate}
-          </div>
-        </div>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
+            <Typography variant="body2" sx={{ color: 'warning.main', fontWeight: 600 }}>
+              Present (Late)
+            </Typography>
+            <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'warning.main' }}>
+              {stats.presentLate}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              Arrived after gate cutoff
+            </Typography>
+          </Paper>
+        </Grid>
 
-        <div className="card" style={{ padding: '18px 20px' }}>
-          <span style={{ fontSize: '13px', color: '#dc2626', fontWeight: '500' }}>Absent</span>
-          <div style={{ fontSize: '28px', fontWeight: '800', color: '#dc2626', marginTop: '6px' }}>
-            {stats.absent}
-          </div>
-        </div>
-      </div>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
+            <Typography variant="body2" sx={{ color: 'error.main', fontWeight: 600 }}>
+              Absent Unlogged
+            </Typography>
+            <Typography variant="h4" sx={{ fontWeight: 800, mt: 1, color: 'error.main' }}>
+              {stats.absent}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              No RFID scan recorded
+            </Typography>
+          </Paper>
+        </Grid>
+      </Grid>
 
-      {/* Boys / Girls & Alerts Summary Card */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-        <div className="card" style={{ padding: '18px 20px' }}>
-          <h4 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '12px' }}>👦 👧 Student Demographics</h4>
-          <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
-            <div>
-              <div style={{ fontSize: '22px', fontWeight: '800', color: '#0284c7' }}>{stats.boys?.present || 0} / {stats.boys?.total || 0}</div>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>Boys (Present / Total)</span>
-            </div>
-            <div style={{ borderLeft: '1px solid #e2e8f0' }}></div>
-            <div>
-              <div style={{ fontSize: '22px', fontWeight: '800', color: '#ec4899' }}>{stats.girls?.present || 0} / {stats.girls?.total || 0}</div>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>Girls (Present / Total)</span>
-            </div>
-          </div>
-        </div>
+      {/* Demographic Breakdown Row */}
+      <Grid container spacing={2}>
+        <Grid item xs={12} sm={6}>
+          <Paper elevation={0} sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar sx={{ bgcolor: 'info.50', color: 'info.main' }}>
+              <ManIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                Boys: {stats.boys?.present || 0} Present / {stats.boys?.absent || 0} Absent
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                Total enrolled boys: {stats.boys?.total || 0}
+              </Typography>
+            </Box>
+          </Paper>
+        </Grid>
 
-        <div className="card" style={{ padding: '18px 20px' }}>
-          <h4 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '12px' }}>📧 📲 Parent Communication Delivery</h4>
-          <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
-            <div>
-              <div style={{ fontSize: '22px', fontWeight: '800', color: '#059669' }}>Active</div>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>Gmail SMTP (beriyahiren008@gmail.com)</span>
-            </div>
-            <div style={{ borderLeft: '1px solid #e2e8f0' }}></div>
-            <div>
-              <div style={{ fontSize: '22px', fontWeight: '800', color: '#2563eb' }}>Multi-Channel</div>
-              <span style={{ fontSize: '12px', color: '#64748b' }}>Email + WhatsApp/SMS</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        <Grid item xs={12} sm={6}>
+          <Paper elevation={0} sx={{ p: 2, borderRadius: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar sx={{ bgcolor: 'secondary.50', color: '#db2777' }}>
+              <WomanIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                Girls: {stats.girls?.present || 0} Present / {stats.girls?.absent || 0} Absent
+              </Typography>
+              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                Total enrolled girls: {stats.girls?.total || 0}
+              </Typography>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
 
-      {/* Attendance Records Table */}
-      <div className="card" style={{ overflow: 'hidden' }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '700' }}>
-            Attendance Entries ({records.length})
-          </h3>
-          <span style={{ fontSize: '12px', color: '#64748b' }}>Showing records for {selectedDate}</span>
-        </div>
+      {/* Responsive Records Table */}
+      <Paper elevation={0} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+        <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+            Daily Attendance Records ({records.length})
+          </Typography>
+        </Box>
 
-        <div style={{ overflowX: 'auto' }}>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>GR No</th>
-                <th>Student Name</th>
-                <th>Class</th>
-                <th>Gender</th>
-                <th>Parent Email</th>
-                <th>Status</th>
-                <th>Method</th>
-                <th>Alert Status</th>
-              </tr>
-            </thead>
-            <tbody>
+        <TableContainer sx={{ maxHeight: 600 }}>
+          <Table stickyHeader size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Time</TableCell>
+                <TableCell>GR No</TableCell>
+                <TableCell>Roll</TableCell>
+                <TableCell>Student Name</TableCell>
+                <TableCell>Class</TableCell>
+                <TableCell>Gender</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell>Method</TableCell>
+                <TableCell>Alerts Dispatched</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {records.length === 0 ? (
-                <tr>
-                  <td colSpan="9" style={{ textAlign: 'center', padding: '40px', color: '#94a3b8' }}>
-                    No attendance records found for this date and filter.
-                  </td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={9} align="center" sx={{ py: 6, color: 'text.secondary' }}>
+                    <PeopleIcon sx={{ fontSize: 40, color: 'divider', mb: 1, display: 'block', mx: 'auto' }} />
+                    No attendance records logged for this date.
+                  </TableCell>
+                </TableRow>
               ) : (
-                records.map((r, i) => (
-                  <tr key={i}>
-                    <td style={{ fontWeight: '500' }}>{r.time}</td>
-                    <td style={{ fontWeight: '700', color: '#0f172a' }}>{r.grNo}</td>
-                    <td style={{ fontWeight: '600' }}>{r.fullName}</td>
-                    <td><span className="badge badge-rfid">{r.className}</span></td>
-                    <td>{r.gender}</td>
-                    <td>
-                      {r.parentEmail ? (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', color: '#0369a1', fontSize: '12.5px' }}>
-                          <Mail size={13} color="#0284c7" /> {r.parentEmail}
-                        </span>
-                      ) : (
-                        <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '12px' }}>None</span>
-                      )}
-                    </td>
-                    <td>
-                      <span className={
-                        r.status === 'Present'
-                          ? 'badge badge-present'
-                          : r.status === 'Present (Late)'
-                          ? 'badge badge-late'
-                          : 'badge badge-absent'
-                      }>
-                        {r.status}
-                      </span>
-                    </td>
-                    <td><span style={{ fontSize: '12px', color: '#64748b' }}>{r.scanMethod}</span></td>
-                    <td>
-                      <span style={{
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        color: '#16a34a',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px'
-                      }}>
-                        ✓ Alert Dispatched
-                      </span>
-                    </td>
-                  </tr>
+                records.map((r, idx) => (
+                  <TableRow key={idx} hover>
+                    <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{r.time}</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>{r.grNo}</TableCell>
+                    <TableCell>{r.rollNo || '-'}</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>{r.fullName}</TableCell>
+                    <TableCell>
+                      <Chip label={r.className} size="small" variant="outlined" sx={{ fontWeight: 700 }} />
+                    </TableCell>
+                    <TableCell>{r.gender}</TableCell>
+                    <TableCell>{getStatusChip(r.status)}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={r.scanMethod || 'RFID'}
+                        size="small"
+                        sx={{ bgcolor: 'grey.100', fontSize: '0.7rem' }}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={0.5}>
+                        <Chip
+                          label={`SMS: ${r.smsStatus || 'SENT'}`}
+                          size="small"
+                          color={r.smsStatus === 'FAILED' ? 'error' : 'success'}
+                          variant="outlined"
+                          sx={{ fontSize: '0.68rem', height: 22 }}
+                        />
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </Box>
   );
 }

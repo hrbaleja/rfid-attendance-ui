@@ -1,9 +1,32 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Lock, Mail, Key, ShieldCheck, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  Button,
+  IconButton,
+  InputAdornment,
+  Alert,
+  Avatar,
+  Stack,
+  useTheme
+} from '@mui/material';
+import {
+  LockOutlined as LockIcon,
+  EmailOutlined as EmailIcon,
+  VpnKeyOutlined as KeyIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  ArrowForward as ArrowForwardIcon,
+  VerifiedUserOutlined as VerifiedUserIcon
+} from '@mui/icons-material';
 
 export default function LoginView() {
   const { login } = useAuth();
+  const theme = useTheme();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,236 +47,187 @@ export default function LoginView() {
     }
   };
 
-  const handleFillDemo = () => {
-    setEmail('');
-    setPassword('');
-    setError(null);
-  };
-
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-        padding: '20px',
+        p: { xs: 2, sm: 3 },
         position: 'relative',
         overflow: 'hidden'
       }}
     >
-      {/* Ambient background glows */}
-      <div
-        style={{
+      {/* Background ambient lighting */}
+      <Box
+        sx={{
           position: 'absolute',
-          width: '500px',
-          height: '500px',
+          width: 500,
+          height: 500,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(37,99,235,0.18) 0%, transparent 70%)',
-          top: '-100px',
-          left: '-100px',
+          background: 'radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 70%)',
+          top: -120,
+          left: -120,
           pointerEvents: 'none'
         }}
       />
-      <div
-        style={{
+      <Box
+        sx={{
           position: 'absolute',
-          width: '500px',
-          height: '500px',
+          width: 500,
+          height: 500,
           borderRadius: '50%',
           background: 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)',
-          bottom: '-100px',
-          right: '-100px',
+          bottom: -120,
+          right: -120,
           pointerEvents: 'none'
         }}
       />
 
       {/* Main Login Card */}
-      <div
-        style={{
+      <Card
+        elevation={4}
+        sx={{
           width: '100%',
-          maxWidth: '440px',
+          maxWidth: 440,
+          borderRadius: 4,
           backgroundColor: 'rgba(255, 255, 255, 0.98)',
-          borderRadius: '20px',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
-          padding: '36px 32px',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          p: { xs: 1, sm: 2 },
           position: 'relative',
           zIndex: 1
         }}
       >
-        {/* Header Icon & Title */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div
-            style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '16px',
-              background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-              color: '#ffffff',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.4)',
-              marginBottom: '16px'
-            }}
-          >
-            <Lock size={26} />
-          </div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.5px' }}>
-            RFID Attendance Alert System
-          </h1>
-          <p style={{ fontSize: '13.5px', color: '#64748b', marginTop: '6px' }}>
-            Sign in with your administrator credentials
-          </p>
-        </div>
+        <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+          {/* Header Icon & Title */}
+          <Box sx={{ textAlign: 'center', mb: 3.5 }}>
+            <Avatar
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: 3,
+                bgcolor: 'primary.main',
+                color: '#fff',
+                mx: 'auto',
+                mb: 2,
+                boxShadow: '0 10px 15px -3px rgba(37, 99, 235, 0.4)'
+              }}
+            >
+              <LockIcon fontSize="medium" />
+            </Avatar>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 800,
+                color: 'text.primary',
+                letterSpacing: '-0.5px',
+                fontSize: { xs: '1.25rem', sm: '1.45rem' }
+              }}
+            >
+              RFID Attendance Alert System
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+              Sign in with your administrator credentials
+            </Typography>
+          </Box>
 
-        {/* Error Alert */}
-        {error && (
-          <div
-            style={{
-              padding: '12px 14px',
-              backgroundColor: '#fef2f2',
-              border: '1px solid #fecaca',
-              borderRadius: '10px',
-              color: '#dc2626',
-              fontSize: '13px',
-              fontWeight: '500',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '20px'
-            }}
-          >
-            <AlertCircle size={16} />
-            <span>{error}</span>
-          </div>
-        )}
+          {/* Error Message */}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2 }}>
+              {error}
+            </Alert>
+          )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
-              Administrator Email
-            </label>
-            <div style={{ position: 'relative' }}>
-              <Mail
-                size={16}
-                color="#94a3b8"
-                style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
-              />
-              <input
+          {/* Form */}
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+            <Stack spacing={2.5}>
+              <TextField
+                fullWidth
+                label="Administrator Email"
                 type="email"
                 required
                 placeholder="admin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  paddingLeft: '38px',
-                  paddingRight: '12px',
-                  paddingTop: '11px',
-                  paddingBottom: '11px',
-                  fontSize: '14px',
-                  borderRadius: '10px',
-                  border: '1px solid #cbd5e1'
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    </InputAdornment>
+                  )
                 }}
               />
-            </div>
-          </div>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: '#334155', marginBottom: '6px' }}>
-              Password
-            </label>
-            <div style={{ position: 'relative' }}>
-              <Key
-                size={16}
-                color="#94a3b8"
-                style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }}
-              />
-              <input
+              <TextField
+                fullWidth
+                label="Password"
                 type={showPassword ? 'text' : 'password'}
                 required
                 placeholder="••••••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  width: '100%',
-                  paddingLeft: '38px',
-                  paddingRight: '40px',
-                  paddingTop: '11px',
-                  paddingBottom: '11px',
-                  fontSize: '14px',
-                  borderRadius: '10px',
-                  border: '1px solid #cbd5e1'
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <KeyIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                        size="small"
+                      >
+                        {showPassword ? <VisibilityOffIcon fontSize="small" /> : <VisibilityIcon fontSize="small" />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
                 }}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={{
-                  position: 'absolute',
-                  right: '10px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  padding: '4px',
-                  color: '#64748b'
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={loading}
+                endIcon={!loading && <ArrowForwardIcon />}
+                sx={{
+                  py: 1.4,
+                  fontSize: '0.95rem',
+                  fontWeight: 700,
+                  borderRadius: 2.5,
+                  mt: 1
                 }}
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-          </div>
+                {loading ? 'Authenticating...' : 'Sign In to Dashboard'}
+              </Button>
+            </Stack>
+          </Box>
 
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: '100%',
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              padding: '13px',
-              borderRadius: '10px',
-              fontSize: '14.5px',
-              fontWeight: '700',
-              border: 'none',
-              cursor: loading ? 'not-allowed' : 'pointer',
+          {/* Footer Badge */}
+          <Box
+            sx={{
+              mt: 3,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '8px',
-              boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.3)',
-              marginTop: '4px',
-              transition: 'background-color 0.2s'
+              gap: 0.75,
+              color: 'text.secondary',
+              fontSize: '0.75rem'
             }}
           >
-            {loading ? 'Authenticating...' : 'Sign In to Dashboard'}
-            {!loading && <ArrowRight size={16} />}
-          </button>
-        </form>
-
-        
-
-        {/* Footer Security Badge */}
-        <div
-          style={{
-            marginTop: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            color: '#94a3b8',
-            fontSize: '11.5px'
-          }}
-        >
-          <ShieldCheck size={14} color="#10b981" />
-          <span>Secured with JWT Token Authentication</span>
-        </div>
-      </div>
-    </div>
+            <VerifiedUserIcon sx={{ fontSize: 16, color: 'success.main' }} />
+            <span>Secured with JWT Token Authentication</span>
+          </Box>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }

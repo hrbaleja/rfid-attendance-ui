@@ -1,7 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api';
 import { socket } from '../socket';
-import { CreditCard, CheckCircle2, AlertCircle, Smartphone, User, Sparkles, RefreshCw, Radio } from 'lucide-react';
+import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Alert,
+  Chip,
+  Stack,
+  Divider,
+  Avatar,
+  List,
+  ListItem,
+  ListItemText
+} from '@mui/material';
+import {
+  Contactless as ContactlessIcon,
+  AutoAwesome as SparklesIcon,
+  CheckCircle as CheckCircleIcon,
+  Error as AlertCircleIcon,
+  Sensors as SensorsIcon,
+  Person as PersonIcon,
+  Phone as PhoneIcon,
+  Email as EmailIcon,
+  Badge as BadgeIcon
+} from '@mui/icons-material';
 
 export default function CardEnrollment({ config, onStudentAdded }) {
   const [detectedUid, setDetectedUid] = useState('');
@@ -24,7 +54,6 @@ export default function CardEnrollment({ config, onStudentAdded }) {
   const [recentCards, setRecentCards] = useState([]);
 
   useEffect(() => {
-    // Listen for live unregistered cards tapped on ESP32 or desk reader!
     const handleUnregisteredCard = (data) => {
       if (data?.uid) {
         setDetectedUid(data.uid);
@@ -60,7 +89,9 @@ export default function CardEnrollment({ config, onStudentAdded }) {
     try {
       const res = await api.post('/api/students', formData);
       if (res.data.success) {
-        setSuccessMsg(`Card [${formData.rfidUid}] successfully assigned to ${formData.fullName} (${formData.className})!`);
+        setSuccessMsg(
+          `Card [${formData.rfidUid}] successfully assigned to ${formData.fullName} (${formData.className})!`
+        );
         setFormData({
           rfidUid: '',
           fullName: '',
@@ -85,389 +116,412 @@ export default function CardEnrollment({ config, onStudentAdded }) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Top Banner: Tap-to-Detect Feature */}
-      <div
-        className="card"
-        style={{
-          padding: '20px 24px',
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      {/* Tap-to-Detect Banner */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: { xs: 2.5, sm: 3 },
+          borderRadius: 3,
           background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
           color: '#ffffff',
           display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: 2
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              backgroundColor: 'rgba(255,255,255,0.2)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Avatar
+            variant="rounded"
+            sx={{
+              bgcolor: 'rgba(255,255,255,0.2)',
+              width: 50,
+              height: 50,
+              borderRadius: 2.5
             }}
           >
-            <CreditCard size={26} color="#fff" />
-          </div>
-          <div>
-            <h2 style={{ fontSize: '18px', fontWeight: '800' }}>RFID Card Enrollment Studio</h2>
-            <p style={{ fontSize: '13px', opacity: 0.9, marginTop: '2px' }}>
+            <ContactlessIcon sx={{ fontSize: 28, color: '#ffffff' }} />
+          </Avatar>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#ffffff' }}>
+              RFID Card Enrollment Studio
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9, fontSize: '0.825rem' }}>
               Assign new physical RFID smart cards to students with live tap-to-detect.
-            </p>
-          </div>
-        </div>
+            </Typography>
+          </Box>
+        </Box>
 
         {/* Live Card Detector Box */}
-        <div
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.15)',
+        <Box
+          sx={{
+            bgcolor: 'rgba(255,255,255,0.15)',
             border: '1px solid rgba(255,255,255,0.3)',
-            borderRadius: '10px',
-            padding: '10px 18px',
-            textAlign: 'right'
+            borderRadius: 2.5,
+            px: 2,
+            py: 1.25,
+            width: { xs: '100%', sm: 'auto' },
+            textAlign: { xs: 'left', sm: 'right' }
           }}
         >
-          <div style={{ fontSize: '12px', opacity: 0.9, display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'flex-end' }}>
-            <span className="pulse-dot" style={{ backgroundColor: '#4ade80' }}></span>
-            <span>Live Card Detector:</span>
-          </div>
-          <div style={{ fontSize: '16px', fontWeight: '800', fontFamily: 'monospace', letterSpacing: '1px', marginTop: '2px' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
+            <Box className="pulse-dot" sx={{ width: 8, height: 8, bgcolor: '#4ade80', borderRadius: '50%' }} />
+            <Typography variant="caption" sx={{ fontWeight: 600, opacity: 0.9 }}>
+              Live Card Detector:
+            </Typography>
+          </Box>
+          <Typography
+            sx={{
+              fontWeight: 800,
+              fontFamily: 'monospace',
+              fontSize: '0.95rem',
+              letterSpacing: '0.05em',
+              mt: 0.2
+            }}
+          >
             {detectedUid ? `DETECTED: ${detectedUid}` : 'Ready — Tap Card on Reader'}
-          </div>
-        </div>
-      </div>
+          </Typography>
+        </Box>
+      </Paper>
 
-      {/* Main Grid: Form on Left, Digital ID Card Preview on Right */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '24px' }}>
-        {/* Enrollment Form */}
-        <div className="card" style={{ padding: '24px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Sparkles size={18} color="#2563eb" /> Student Details & Card Assignment
-          </h3>
+      {/* Main Grid: Form on Left, Digital Preview on Right */}
+      <Grid container spacing={3}>
+        {/* Left Column: Enrollment Form */}
+        <Grid item xs={12} lg={7.5}>
+          <Paper elevation={0} sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+            >
+              <SparklesIcon sx={{ color: 'primary.main', fontSize: 20 }} /> Student Details & Card Assignment
+            </Typography>
 
-          {successMsg && (
-            <div style={{ padding: '12px 16px', backgroundColor: '#ecfdf5', color: '#059669', borderRadius: '8px', marginBottom: '16px', fontSize: '13.5px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <CheckCircle2 size={18} /> {successMsg}
-            </div>
-          )}
+            {successMsg && (
+              <Alert severity="success" sx={{ mb: 2.5, borderRadius: 2 }}>
+                {successMsg}
+              </Alert>
+            )}
 
-          {errorMsg && (
-            <div style={{ padding: '12px 16px', backgroundColor: '#fef2f2', color: '#dc2626', borderRadius: '8px', marginBottom: '16px', fontSize: '13.5px', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AlertCircle size={18} /> {errorMsg}
-            </div>
-          )}
+            {errorMsg && (
+              <Alert severity="error" sx={{ mb: 2.5, borderRadius: 2 }}>
+                {errorMsg}
+              </Alert>
+            )}
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* RFID UID Field */}
-            <div style={{ padding: '14px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#1e40af', marginBottom: '4px' }}>
-                RFID CARD UID (HEX) *
-              </label>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input
-                  type="text"
-                  required
-                  placeholder="Tap card on ESP32 or enter UID (e.g. 4A7B2C1D)"
-                  value={formData.rfidUid}
-                  onChange={(e) => setFormData({ ...formData, rfidUid: e.target.value.toUpperCase().trim() })}
-                  style={{
-                    flex: 1,
-                    fontFamily: 'monospace',
-                    fontWeight: '700',
-                    fontSize: '15px',
-                    color: '#2563eb',
-                    letterSpacing: '1px'
+            <Box component="form" onSubmit={handleSubmit}>
+              <Stack spacing={2.5}>
+                {/* RFID UID Field */}
+                <Box>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', display: 'block', mb: 0.5 }}>
+                    RFID CARD UID (HEX) *
+                  </Typography>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      required
+                      placeholder="e.g. E1F2A3B4"
+                      value={formData.rfidUid}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rfidUid: e.target.value.toUpperCase().trim() })
+                      }
+                      InputProps={{
+                        sx: { fontFamily: 'monospace', fontWeight: 700, color: 'primary.main' }
+                      }}
+                    />
+                    {detectedUid && (
+                      <Button
+                        variant="outlined"
+                        color="success"
+                        size="small"
+                        onClick={() => setFormData({ ...formData, rfidUid: detectedUid })}
+                        sx={{ whiteSpace: 'nowrap' }}
+                      >
+                        Use Detected
+                      </Button>
+                    )}
+                  </Stack>
+                </Box>
+
+                {/* Name & GR */}
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={8}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      required
+                      label="Full Student Name"
+                      value={formData.fullName}
+                      onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      required
+                      label="GR Number"
+                      value={formData.grNo}
+                      onChange={(e) => setFormData({ ...formData, grNo: e.target.value.toUpperCase().trim() })}
+                    />
+                  </Grid>
+                </Grid>
+
+                {/* Class, Roll, Gender */}
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Class</InputLabel>
+                      <Select
+                        label="Class"
+                        value={formData.className}
+                        onChange={(e) => setFormData({ ...formData, className: e.target.value })}
+                      >
+                        <MenuItem value="9A">Class 9A</MenuItem>
+                        <MenuItem value="10A">Class 10A</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Roll Number"
+                      value={formData.rollNo}
+                      onChange={(e) => setFormData({ ...formData, rollNo: e.target.value })}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <FormControl fullWidth size="small">
+                      <InputLabel>Gender</InputLabel>
+                      <Select
+                        label="Gender"
+                        value={formData.gender}
+                        onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                      >
+                        <MenuItem value="Boy">Boy</MenuItem>
+                        <MenuItem value="Girl">Girl</MenuItem>
+                        <MenuItem value="Other">Other</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                </Grid>
+
+                <Divider sx={{ my: 1 }} />
+
+                {/* Parent Contact Information */}
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                  Parent Contact & Alert Channels
+                </Typography>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      required
+                      label="Parent / Guardian Name"
+                      value={formData.parentName}
+                      onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      required
+                      label="Parent Mobile (SMS/WhatsApp)"
+                      placeholder="e.g. 9876543210"
+                      value={formData.parentPhone}
+                      onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="email"
+                      label="Parent Email Address"
+                      placeholder="parent@example.com"
+                      value={formData.parentEmail}
+                      onChange={(e) => setFormData({ ...formData, parentEmail: e.target.value })}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  disabled={loading}
+                  sx={{ py: 1.3, fontWeight: 700, mt: 1 }}
+                >
+                  {loading ? 'Registering Student...' : 'Assign & Activate RFID Card'}
+                </Button>
+              </Stack>
+            </Box>
+          </Paper>
+        </Grid>
+
+        {/* Right Column: Digital ID Preview & Recent Enrollments */}
+        <Grid item xs={12} lg={4.5}>
+          <Stack spacing={3}>
+            {/* Visual Smart Card Preview */}
+            <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.secondary', mb: 2 }}>
+                Live Smart Card Graphic Preview
+              </Typography>
+
+              {/* Graphic Card */}
+              <Box
+                sx={{
+                  background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+                  borderRadius: 3.5,
+                  p: 3,
+                  color: '#ffffff',
+                  boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.4)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                {/* Glow accent */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: -40,
+                    right: -40,
+                    width: 140,
+                    height: 140,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%)',
+                    pointerEvents: 'none'
                   }}
                 />
-                {detectedUid && (
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, rfidUid: detectedUid })}
-                    style={{
-                      padding: '8px 12px',
-                      backgroundColor: '#eff6ff',
-                      color: '#1d4ed8',
-                      borderRadius: '8px',
-                      fontSize: '12px',
-                      fontWeight: '700'
+
+                {/* Card Top */}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Typography sx={{ fontWeight: 800, fontSize: '0.85rem', letterSpacing: '0.05em' }}>
+                    {config?.schoolName || 'SARDAR PATEL VIDYALAYA'}
+                  </Typography>
+                  <Chip
+                    label="RFID CARD"
+                    size="small"
+                    sx={{ bgcolor: 'primary.main', color: '#fff', fontWeight: 800, fontSize: '0.65rem' }}
+                  />
+                </Box>
+
+                {/* Card Chip & Student Info */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+                  {/* Gold chip graphic */}
+                  <Box
+                    sx={{
+                      width: 44,
+                      height: 32,
+                      borderRadius: 1,
+                      background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                      border: '1px solid #b45309',
+                      position: 'relative'
                     }}
                   >
-                    Apply Detected
-                  </button>
-                )}
-              </div>
-              <span style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', display: 'block' }}>
-                💡 Tip: Tap any unassigned card on your ESP32 reader — the UID will automatically appear here!
-              </span>
-            </div>
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        inset: 4,
+                        border: '1px solid rgba(0,0,0,0.25)',
+                        borderRadius: 0.5
+                      }}
+                    />
+                  </Box>
 
-            {/* Student Full Name */}
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Student Full Name *</label>
-              <input
-                type="text"
-                required
-                placeholder="e.g. Rohan Rajesh Patel"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                style={{ width: '100%' }}
-              />
-            </div>
+                  <Box>
+                    <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', color: '#f8fafc', lineHeight: 1.2 }}>
+                      {formData.fullName || 'STUDENT NAME'}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'grey.400' }}>
+                      Class: <strong>{formData.className || '9A'}</strong> | Roll:{' '}
+                      <strong>{formData.rollNo || '-'}</strong>
+                    </Typography>
+                  </Box>
+                </Box>
 
-            {/* GR No, Roll No, Class */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>GR Number *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. GR1025"
-                  value={formData.grNo}
-                  onChange={(e) => setFormData({ ...formData, grNo: e.target.value.toUpperCase().trim() })}
-                  style={{ width: '100%', fontWeight: '700' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Roll Number *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. 15"
-                  value={formData.rollNo}
-                  onChange={(e) => setFormData({ ...formData, rollNo: e.target.value.trim() })}
-                  style={{ width: '100%' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Class / Div *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. 9A, 10B"
-                  value={formData.className}
-                  onChange={(e) => setFormData({ ...formData, className: e.target.value.toUpperCase().trim() })}
-                  style={{ width: '100%', fontWeight: '700' }}
-                />
-              </div>
-            </div>
-
-            {/* Gender, DOB, Parent Email */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Gender</label>
-                <select
-                  style={{ width: '100%' }}
-                  value={formData.gender}
-                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-                >
-                  <option value="Boy">Boy</option>
-                  <option value="Girl">Girl</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Date of Birth</label>
-                <input
-                  type="date"
-                  value={formData.dob}
-                  onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                  style={{ width: '100%' }}
-                />
-              </div>
-            </div>
-
-            {/* Parent Email for Alerts */}
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>
-                Parent Email (Instant Delivery) *
-              </label>
-              <input
-                type="email"
-                required
-                placeholder="e.g. hrbaleja.04@gmail.com"
-                value={formData.parentEmail}
-                onChange={(e) => setFormData({ ...formData, parentEmail: e.target.value })}
-                style={{ width: '100%' }}
-              />
-            </div>
-
-            {/* Parent Name & Phone */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Parent / Guardian Name</label>
-                <input
-                  type="text"
-                  placeholder="Father/Mother Name"
-                  value={formData.parentName}
-                  onChange={(e) => setFormData({ ...formData, parentName: e.target.value })}
-                  style={{ width: '100%' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Parent Mobile (SMS/WhatsApp) *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="10-digit mobile"
-                  value={formData.parentPhone}
-                  onChange={(e) => setFormData({ ...formData, parentPhone: e.target.value.trim() })}
-                  style={{ width: '100%', fontWeight: '700' }}
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                backgroundColor: '#2563eb',
-                color: '#fff',
-                padding: '13px',
-                borderRadius: '8px',
-                fontSize: '14.5px',
-                fontWeight: '700',
-                marginTop: '10px'
-              }}
-            >
-              <CreditCard size={18} />
-              {loading ? 'Enrolling & Saving to Atlas...' : 'Enroll Card & Save Student'}
-            </button>
-          </form>
-        </div>
-
-        {/* Live Smart Card Preview */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div>
-            <h4 style={{ fontSize: '13px', fontWeight: '700', color: '#64748b', textTransform: 'uppercase', marginBottom: '8px' }}>
-              Live Student Smart Card Preview
-            </h4>
-
-            {/* Physical ID Card Widget */}
-            <div
-              style={{
-                width: '100%',
-                height: '240px',
-                borderRadius: '16px',
-                background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
-                color: '#fff',
-                padding: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                boxShadow: '0 10px 25px -5px rgba(15, 23, 42, 0.3)',
-                position: 'relative',
-                overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.1)'
-              }}
-            >
-              {/* Background Chip Watermark */}
-              <div
-                style={{
-                  position: 'absolute',
-                  right: '-20px',
-                  bottom: '-20px',
-                  width: '140px',
-                  height: '140px',
-                  borderRadius: '50%',
-                  background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)'
-                }}
-              />
-
-              {/* Card Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontSize: '20px' }}>🏫</span>
-                  <span style={{ fontSize: '13px', fontWeight: '800', letterSpacing: '0.5px' }}>
-                    {config?.schoolName || 'SARDAR PATEL VIDYALAYA'}
-                  </span>
-                </div>
-                <span style={{ fontSize: '11px', fontWeight: '700', backgroundColor: '#3b82f6', padding: '2px 8px', borderRadius: '4px' }}>
-                  RFID CARD
-                </span>
-              </div>
-
-              {/* Card Center: Chip Graphic + Student Info */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                {/* Gold RFID Chip Graphic */}
-                <div
-                  style={{
-                    width: '42px',
-                    height: '32px',
-                    borderRadius: '6px',
-                    background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                    border: '1px solid #b45309',
-                    position: 'relative'
-                  }}
-                >
-                  <div style={{ position: 'absolute', inset: '4px', border: '1px solid rgba(0,0,0,0.2)', borderRadius: '2px' }} />
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '0.5px', color: '#f8fafc' }}>
-                    {formData.fullName || 'STUDENT NAME'}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>
-                    Class: <strong style={{ color: '#fff' }}>{formData.className || '9A'}</strong> | Roll No: <strong style={{ color: '#fff' }}>{formData.rollNo || '-'}</strong>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card Footer: GR No + UID Code */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '10px' }}>
-                <div>
-                  <span style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase' }}>General Register</span>
-                  <div style={{ fontSize: '14px', fontWeight: '700', fontFamily: 'monospace' }}>
-                    {formData.grNo || 'GR----'}
-                  </div>
-                </div>
-
-                <div style={{ textAlign: 'right' }}>
-                  <span style={{ fontSize: '10px', color: '#94a3b8', textTransform: 'uppercase' }}>Card UID</span>
-                  <div style={{ fontSize: '14px', fontWeight: '800', fontFamily: 'monospace', color: '#60a5fa' }}>
-                    {formData.rfidUid || '--------'}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Enrolled List */}
-          <div className="card" style={{ padding: '18px' }}>
-            <h4 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '12px' }}>
-              Recently Enrolled Students
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '240px', overflowY: 'auto' }}>
-              {recentCards.map((st) => (
-                <div
-                  key={st._id}
-                  style={{
+                {/* Card Bottom */}
+                <Box
+                  sx={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '8px 10px',
-                    backgroundColor: '#f8fafc',
-                    borderRadius: '6px',
-                    fontSize: '12.5px'
+                    alignItems: 'flex-end',
+                    pt: 1.5,
+                    borderTop: '1px solid rgba(255,255,255,0.1)'
                   }}
                 >
-                  <div>
-                    <strong style={{ color: '#0f172a' }}>{st.fullName}</strong>
-                    <div style={{ color: '#64748b', fontSize: '11px' }}>{st.className} | GR: {st.grNo}</div>
-                  </div>
-                  <code style={{ fontSize: '11px', color: '#2563eb', fontWeight: '700' }}>{st.rfidUid}</code>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+                  <Box>
+                    <Typography variant="caption" sx={{ color: 'grey.500', textTransform: 'uppercase', fontSize: '0.65rem' }}>
+                      GR Number
+                    </Typography>
+                    <Typography sx={{ fontWeight: 700, fontFamily: 'monospace', fontSize: '0.85rem' }}>
+                      {formData.grNo || 'GR----'}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography variant="caption" sx={{ color: 'grey.500', textTransform: 'uppercase', fontSize: '0.65rem' }}>
+                      Card UID
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontWeight: 800,
+                        fontFamily: 'monospace',
+                        color: 'primary.light',
+                        fontSize: '0.9rem'
+                      }}
+                    >
+                      {formData.rfidUid || '--------'}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+            </Paper>
+
+            {/* Recently Enrolled Cards */}
+            <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>
+                Recently Enrolled Students
+              </Typography>
+              <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {recentCards.map((st) => (
+                  <ListItem
+                    key={st._id}
+                    sx={{
+                      bgcolor: '#f8fafc',
+                      borderRadius: 2,
+                      py: 1,
+                      px: 1.5,
+                      display: 'flex',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <ListItemText
+                      primary={st.fullName}
+                      primaryTypographyProps={{ fontWeight: 700, fontSize: '0.85rem' }}
+                      secondary={`${st.className} | GR: ${st.grNo}`}
+                      secondaryTypographyProps={{ fontSize: '0.75rem' }}
+                    />
+                    <Chip
+                      label={st.rfidUid}
+                      size="small"
+                      sx={{ fontFamily: 'monospace', fontWeight: 700, color: 'primary.main', bgcolor: '#eff6ff' }}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            </Paper>
+          </Stack>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

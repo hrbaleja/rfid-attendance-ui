@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from './api';
 import { socket } from './socket';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { Container, Box, Typography, CircularProgress } from '@mui/material';
 
 import LoginView from './components/LoginView';
 import Navbar from './components/Navbar';
@@ -101,12 +102,22 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f8fafc' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="pulse-dot" style={{ width: '20px', height: '20px', backgroundColor: '#2563eb', margin: '0 auto 12px' }}></div>
-          <span style={{ fontSize: '14px', color: '#64748b', fontWeight: '600' }}>Authenticating Session...</span>
-        </div>
-      </div>
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          bgcolor: 'background.default'
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress size={32} sx={{ mb: 2 }} />
+          <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+            Authenticating Session...
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
@@ -115,7 +126,7 @@ function Dashboard() {
   }
 
   return (
-    <div style={{ maxWidth: '1360px', margin: '0 auto', padding: '24px 20px' }}>
+    <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 3 }, px: { xs: 1.5, sm: 3 } }}>
       {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}
@@ -126,7 +137,7 @@ function Dashboard() {
       />
 
       {/* Main Tab Content */}
-      <main>
+      <Box component="main">
         {activeTab === 'live' && (
           <LiveGateMonitor
             liveScans={liveScans}
@@ -172,7 +183,7 @@ function Dashboard() {
         {activeTab === 'guide' && (
           <SetupGuide config={config} />
         )}
-      </main>
+      </Box>
 
       {/* Manual Entry Popup Modal */}
       <ManualAttendanceModal
@@ -180,7 +191,7 @@ function Dashboard() {
         onClose={() => setIsManualModalOpen(false)}
         onRefresh={fetchDailyAttendance}
       />
-    </div>
+    </Container>
   );
 }
 

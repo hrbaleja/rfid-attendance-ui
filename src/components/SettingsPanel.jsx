@@ -1,6 +1,31 @@
 import React, { useState } from 'react';
 import api, { API_BASE_URL } from '../api';
-import { Save, Bell, Zap, Shield, Key } from 'lucide-react';
+import {
+  Box,
+  Paper,
+  Typography,
+  Grid,
+  Stack,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControlLabel,
+  Checkbox,
+  Button,
+  Divider,
+  Alert,
+  Chip
+} from '@mui/material';
+import {
+  Save as SaveIcon,
+  Campaign as CampaignIcon,
+  Bolt as BoltIcon,
+  VpnKey as KeyIcon,
+  Email as EmailIcon,
+  Send as SendIcon
+} from '@mui/icons-material';
 
 export default function SettingsPanel({ config, setConfig, onRefresh }) {
   const [saving, setSaving] = useState(false);
@@ -26,7 +51,7 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
   };
 
   const handleTriggerDaily = async () => {
-    if (!confirm('Mark all unscanned students today as Absent and dispatch daily reports to teachers and principal now?')) return;
+    if (!window.confirm('Mark all unscanned students today as Absent and dispatch daily reports to teachers and principal now?')) return;
     setActionLoading(true);
     try {
       const res = await api.post('/api/attendance/trigger-daily-cutoff');
@@ -39,7 +64,7 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
   };
 
   const handleTriggerMonthly = async () => {
-    if (!confirm('Calculate current month statistics and dispatch monthly teacher and principal reports now?')) return;
+    if (!window.confirm('Calculate current month statistics and dispatch monthly teacher and principal reports now?')) return;
     setActionLoading(true);
     try {
       const res = await api.post('/api/attendance/trigger-monthly-reports');
@@ -72,370 +97,395 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
     });
   };
 
-  if (!config) return <div className="card" style={{ padding: '30px', textAlign: 'center' }}>Loading configuration...</div>;
+  if (!config) {
+    return (
+      <Paper elevation={0} sx={{ p: 4, textAlign: 'center', borderRadius: 3 }}>
+        <Typography variant="body1" sx={{ color: 'text.secondary' }}>
+          Loading configuration...
+        </Typography>
+      </Paper>
+    );
+  }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '24px' }}>
-      {/* Settings Form */}
-      <div className="card" style={{ padding: '24px' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>School Configuration & Cutoff Timings</h2>
-        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
-          Changes are stored permanently in MongoDB Atlas and take effect immediately.
-        </p>
+    <Grid container spacing={3}>
+      {/* Settings Form Column */}
+      <Grid item xs={12} lg={8}>
+        <Paper elevation={0} sx={{ p: { xs: 2.5, sm: 3 }, borderRadius: 3 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800 }}>
+            School Configuration & Cutoff Timings
+          </Typography>
+          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 3 }}>
+            Settings are stored in MongoDB Atlas and take effect immediately.
+          </Typography>
 
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Official School Name</label>
-              <input
-                type="text"
-                style={{ width: '100%' }}
-                value={config.schoolName || ''}
-                onChange={(e) => setConfig({ ...config, schoolName: e.target.value })}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', marginBottom: '4px' }}>Principal Mobile Number (Receives Reports)</label>
-              <input
-                type="text"
-                placeholder="10-digit number"
-                style={{ width: '100%' }}
-                value={config.principalPhone || ''}
-                onChange={(e) => setConfig({ ...config, principalPhone: e.target.value })}
-              />
-            </div>
-          </div>
+          <Box component="form" onSubmit={handleSave}>
+            <Stack spacing={3}>
+              {/* School Details */}
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Official School Name"
+                    value={config.schoolName || ''}
+                    onChange={(e) => setConfig({ ...config, schoolName: e.target.value })}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="Principal Mobile (Receives Reports)"
+                    placeholder="10-digit number"
+                    value={config.principalPhone || ''}
+                    onChange={(e) => setConfig({ ...config, principalPhone: e.target.value })}
+                  />
+                </Grid>
+              </Grid>
 
-          {/* Smart Low-Cost Alert Strategy Selector */}
-          <div style={{ padding: '16px', backgroundColor: '#eff6ff', borderRadius: '10px', border: '1px solid #bfdbfe' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#1e40af', marginBottom: '6px' }}>
-              📢 Low-Cost Parent Alert Delivery Mode
-            </label>
-            <select
-              style={{ width: '100%', fontWeight: '700', padding: '10px', fontSize: '14px' }}
-              value={config.notificationChannel || 'BOTH'}
-              onChange={(e) => setConfig({ ...config, notificationChannel: e.target.value })}
-            >
-              <option value="BOTH">📱 BOTH (Send Fast2SMS + WhatsApp Simultaneously)</option>
-              <option value="WHATSAPP_FIRST_FALLBACK">⚡ SMART COST-SAVER: WhatsApp First (₹0) ➔ SMS Fallback only if needed (Saves 85%+ Cost!)</option>
-              <option value="WHATSAPP_ONLY">💬 WHATSAPP ONLY (100% Free — ₹0 per message)</option>
-              <option value="SMS_ONLY">📨 CELLULAR SMS ONLY (Fast2SMS)</option>
-            </select>
-            <span style={{ fontSize: '12px', color: '#1d4ed8', marginTop: '6px', display: 'block' }}>
-              💡 <strong>Smart Cost-Saver Mode</strong> sends WhatsApp messages first (free). If a parent doesn't have a smartphone or delivery fails, it automatically sends a Fast2SMS backup so no parent is left behind!
-            </span>
-          </div>
-
-          {/* School Timings */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', padding: '16px', backgroundColor: '#f8fafc', borderRadius: '10px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px', color: '#16a34a' }}>
-                On-Time Cutoff (HH:mm)
-              </label>
-              <input
-                type="text"
-                style={{ width: '100%', fontWeight: '700' }}
-                value={config.onTimeCutoff || '08:15'}
-                onChange={(e) => setConfig({ ...config, onTimeCutoff: e.target.value })}
-              />
-              <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', display: 'block' }}>Scans &lt;= this time = Present</span>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px', color: '#dc2626' }}>
-                Absent Cutoff (HH:mm)
-              </label>
-              <input
-                type="text"
-                style={{ width: '100%', fontWeight: '700' }}
-                value={config.absentCutoff || '09:00'}
-                onChange={(e) => setConfig({ ...config, absentCutoff: e.target.value })}
-              />
-              <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', display: 'block' }}>Unscanned marked Absent</span>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', marginBottom: '4px', color: '#2563eb' }}>
-                Monthly Report Time
-              </label>
-              <input
-                type="text"
-                style={{ width: '100%', fontWeight: '700' }}
-                value={config.monthlyReportTime || '09:30'}
-                onChange={(e) => setConfig({ ...config, monthlyReportTime: e.target.value })}
-              />
-              <span style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', display: 'block' }}>Last day of month report</span>
-            </div>
-          </div>
-
-          {/* SMS / WhatsApp Templates */}
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '13px', fontWeight: '700', color: '#16a34a' }}>
-                Parent Message: Present (On-Time)
-              </label>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                {['{STUDENT_NAME}', '{CLASS}', '{TIME}', '{DATE}'].map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => appendTag('smsTemplatePresent', tag)}
-                    style={{ fontSize: '10.5px', padding: '2px 6px', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '4px' }}
-                  >
-                    +{tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <textarea
-              rows="2"
-              style={{ width: '100%', fontSize: '13px' }}
-              value={config.smsTemplatePresent || ''}
-              onChange={(e) => setConfig({ ...config, smsTemplatePresent: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '13px', fontWeight: '700', color: '#d97706' }}>
-                Parent Message: Present (Late)
-              </label>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                {['{STUDENT_NAME}', '{CLASS}', '{TIME}', '{DATE}'].map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => appendTag('smsTemplateLate', tag)}
-                    style={{ fontSize: '10.5px', padding: '2px 6px', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '4px' }}
-                  >
-                    +{tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <textarea
-              rows="2"
-              style={{ width: '100%', fontSize: '13px' }}
-              value={config.smsTemplateLate || ''}
-              onChange={(e) => setConfig({ ...config, smsTemplateLate: e.target.value })}
-            />
-          </div>
-
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '13px', fontWeight: '700', color: '#dc2626' }}>
-                Parent Message: Absent
-              </label>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                {['{STUDENT_NAME}', '{CLASS}', '{DATE}'].map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => appendTag('smsTemplateAbsent', tag)}
-                    style={{ fontSize: '10.5px', padding: '2px 6px', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '4px' }}
-                  >
-                    +{tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <textarea
-              rows="2"
-              style={{ width: '100%', fontSize: '13px' }}
-              value={config.smsTemplateAbsent || ''}
-              onChange={(e) => setConfig({ ...config, smsTemplateAbsent: e.target.value })}
-            />
-          </div>
-
-          {/* Gmail SMTP Email Notifications Settings */}
-          <div style={{ padding: '18px', backgroundColor: '#f0fdf4', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-              <div>
-                <h4 style={{ fontSize: '14px', fontWeight: '800', color: '#166534', margin: 0 }}>
-                  📧 Gmail SMTP Parent Email Alerts (100% Free)
-                </h4>
-                <p style={{ fontSize: '12px', color: '#15803d', margin: '2px 0 0 0' }}>
-                  Sends instant branded HTML attendance alert cards directly to parent inboxes.
-                </p>
-              </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '700', fontSize: '13px', color: '#166534' }}>
-                <input
-                  type="checkbox"
-                  checked={config.emailNotificationsEnabled !== false}
-                  onChange={(e) => setConfig({ ...config, emailNotificationsEnabled: e.target.checked })}
-                  style={{ width: '16px', height: '16px' }}
-                />
-                Email Alerts Enabled
-              </label>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr', gap: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#166534', marginBottom: '4px' }}>
-                  Sender Gmail Account
-                </label>
-                <input
-                  type="email"
-                  style={{ width: '100%', fontSize: '13px' }}
-                  value={config.smtpUser || 'beriyahiren008@gmail.com'}
-                  onChange={(e) => setConfig({ ...config, smtpUser: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#166534', marginBottom: '4px' }}>
-                  Google App Password (16-char)
-                </label>
-                <input
-                  type="password"
-                  style={{ width: '100%', fontSize: '13px', fontFamily: 'monospace' }}
-                  value={config.smtpPass || 'awlqcninfdwpldbu'}
-                  onChange={(e) => setConfig({ ...config, smtpPass: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#166534', marginBottom: '4px' }}>
-                  Sender Display Name
-                </label>
-                <input
-                  type="text"
-                  style={{ width: '100%', fontSize: '13px' }}
-                  value={config.emailFromName || 'RFID ATTENDANCE'}
-                  onChange={(e) => setConfig({ ...config, emailFromName: e.target.value })}
-                />
-              </div>
-            </div>
-
-            {/* Optional Resend HTTPS API Key */}
-            <div style={{ marginTop: '12px' }}>
-              <label style={{ display: 'block', fontSize: '11.5px', fontWeight: '700', color: '#166534', marginBottom: '4px' }}>
-                Optional Resend HTTPS API Key (Recommended for Railway — Never blocked by cloud firewall)
-              </label>
-              <input
-                type="text"
-                placeholder="re_xxxxxxxxxxxxxxxxxxxx (Optional - Free at resend.com)"
-                style={{ width: '100%', fontSize: '13px', fontFamily: 'monospace' }}
-                value={config.resendApiKey || ''}
-                onChange={(e) => setConfig({ ...config, resendApiKey: e.target.value })}
-              />
-              <span style={{ fontSize: '11px', color: '#15803d', marginTop: '2px', display: 'block' }}>
-                💡 Cloud hosts like Railway block raw SMTP ports (465/587). Adding a free Resend key sends emails instantly over HTTPS (Port 443) with 0 timeout!
-              </span>
-            </div>
-
-            {/* Test Email Dispatcher */}
-            <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #dcfce7', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <span style={{ fontSize: '12px', fontWeight: '600', color: '#166534' }}>Send Test Alert To:</span>
-              <input
-                type="email"
-                placeholder="Target test email"
-                value={testEmailTarget}
-                onChange={(e) => setTestEmailTarget(e.target.value)}
-                style={{ width: '220px', fontSize: '12px', padding: '6px 10px' }}
-              />
-              <button
-                type="button"
-                onClick={handleSendTestEmail}
-                disabled={testEmailLoading}
-                style={{
-                  backgroundColor: '#16a34a',
-                  color: '#fff',
-                  padding: '7px 14px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: '700'
+              {/* Delivery Channel Selector */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2.5,
+                  borderRadius: 2.5,
+                  bgcolor: '#eff6ff',
+                  border: '1px solid #bfdbfe'
                 }}
               >
-                {testEmailLoading ? 'Sending...' : '⚡ Send Test Email'}
-              </button>
-              {testEmailStatus && (
-                <span style={{ fontSize: '12px', fontWeight: '600', color: testEmailStatus.success ? '#15803d' : '#dc2626' }}>
-                  {testEmailStatus.success ? '✓ ' + testEmailStatus.message : '✗ ' + testEmailStatus.message}
-                </span>
-              )}
-            </div>
-          </div>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#1e40af', mb: 1 }}>
+                  📢 Low-Cost Parent Alert Delivery Mode
+                </Typography>
+                <FormControl fullWidth size="small">
+                  <Select
+                    value={config.notificationChannel || 'BOTH'}
+                    onChange={(e) => setConfig({ ...config, notificationChannel: e.target.value })}
+                    sx={{ bgcolor: '#ffffff', fontWeight: 600 }}
+                  >
+                    <MenuItem value="BOTH">📱 BOTH (Fast2SMS + WhatsApp Simultaneously)</MenuItem>
+                    <MenuItem value="WHATSAPP_FIRST_FALLBACK">
+                      ⚡ SMART COST-SAVER: WhatsApp First (₹0) ➔ SMS Fallback only if needed (Saves 85%+)
+                    </MenuItem>
+                    <MenuItem value="WHATSAPP_ONLY">💬 WHATSAPP ONLY (100% Free — ₹0 per message)</MenuItem>
+                    <MenuItem value="SMS_ONLY">📨 CELLULAR SMS ONLY (Fast2SMS)</MenuItem>
+                  </Select>
+                </FormControl>
+                <Typography variant="caption" sx={{ color: '#1d4ed8', mt: 1, display: 'block' }}>
+                  💡 <strong>Smart Cost-Saver Mode</strong> sends WhatsApp messages first (free). If parent doesn't have WhatsApp or delivery fails, it dispatches an SMS backup automatically.
+                </Typography>
+              </Paper>
 
-          <button
-            type="submit"
-            disabled={saving}
-            style={{
-              backgroundColor: '#2563eb',
-              color: '#fff',
-              padding: '12px',
-              fontSize: '14px',
-              fontWeight: '600',
-              borderRadius: '8px'
-            }}
-          >
-            <Save size={16} />
-            {saving ? 'Saving...' : 'Save Settings to MongoDB Atlas'}
-          </button>
-        </form>
-      </div>
+              {/* Cutoff Timings */}
+              <Paper elevation={0} sx={{ p: 2.5, borderRadius: 2.5, bgcolor: '#f8fafc' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1.5 }}>
+                  Gate Cutoff Timers (24-Hour HH:mm)
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="On-Time Cutoff"
+                      value={config.onTimeCutoff || '08:15'}
+                      onChange={(e) => setConfig({ ...config, onTimeCutoff: e.target.value })}
+                      helperText="Scans <= this time = Present"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Absent Cutoff"
+                      value={config.absentCutoff || '09:00'}
+                      onChange={(e) => setConfig({ ...config, absentCutoff: e.target.value })}
+                      helperText="Unscanned marked Absent"
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Monthly Report Time"
+                      value={config.monthlyReportTime || '09:30'}
+                      onChange={(e) => setConfig({ ...config, monthlyReportTime: e.target.value })}
+                      helperText="Last day of month report"
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
 
-      {/* Manual Automation Controls */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <div className="card" style={{ padding: '22px' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Zap size={18} color="#f59e0b" /> Manual Report Dispatch
-          </h3>
-          <p style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.5', marginBottom: '14px' }}>
-            Normally automated by background cron jobs. You can trigger them anytime on demand:
-          </p>
+              {/* Message Templates */}
+              <Stack spacing={2}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                  Personalized Notification Templates
+                </Typography>
 
-          <button
-            onClick={handleTriggerDaily}
-            disabled={actionLoading}
-            style={{
-              width: '100%',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              padding: '10px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: '600',
-              marginBottom: '10px'
-            }}
-          >
-            📲 Run Daily Cutoff & Send SMS Now
-          </button>
+                {/* Present On-Time Template */}
+                <Box>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'success.main' }}>
+                      Present (On-Time) Template
+                    </Typography>
+                    <Stack direction="row" spacing={0.5}>
+                      {['{STUDENT_NAME}', '{CLASS}', '{TIME}', '{DATE}'].map((tag) => (
+                        <Chip
+                          key={tag}
+                          label={tag}
+                          size="small"
+                          clickable
+                          onClick={() => appendTag('smsTemplatePresent', tag)}
+                          sx={{ fontSize: '0.65rem', height: 20 }}
+                        />
+                      ))}
+                    </Stack>
+                  </Stack>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    size="small"
+                    value={config.smsTemplatePresent || ''}
+                    onChange={(e) => setConfig({ ...config, smsTemplatePresent: e.target.value })}
+                  />
+                </Box>
 
-          <button
-            onClick={handleTriggerMonthly}
-            disabled={actionLoading}
-            style={{
-              width: '100%',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              padding: '10px',
-              borderRadius: '8px',
-              fontSize: '13px',
-              fontWeight: '600'
-            }}
-          >
-            📅 Send Monthly Reports Now
-          </button>
-        </div>
+                {/* Present Late Template */}
+                <Box>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'warning.main' }}>
+                      Present (Late) Template
+                    </Typography>
+                    <Stack direction="row" spacing={0.5}>
+                      {['{STUDENT_NAME}', '{CLASS}', '{TIME}', '{DATE}'].map((tag) => (
+                        <Chip
+                          key={tag}
+                          label={tag}
+                          size="small"
+                          clickable
+                          onClick={() => appendTag('smsTemplateLate', tag)}
+                          sx={{ fontSize: '0.65rem', height: 20 }}
+                        />
+                      ))}
+                    </Stack>
+                  </Stack>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    size="small"
+                    value={config.smsTemplateLate || ''}
+                    onChange={(e) => setConfig({ ...config, smsTemplateLate: e.target.value })}
+                  />
+                </Box>
 
-        <div className="card" style={{ padding: '22px' }}>
-          <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Key size={18} color="#2563eb" /> Device Authentication
-          </h3>
-          <div style={{ fontSize: '13px', color: '#475569', lineHeight: '1.6' }}>
-            <p><strong>Hardware Secret Key:</strong></p>
-            <code style={{ display: 'block', backgroundColor: '#f1f5f9', padding: '6px 10px', borderRadius: '6px', fontWeight: '700', marginTop: '4px' }}>
+                {/* Absent Template */}
+                <Box>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 0.5 }}>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'error.main' }}>
+                      Absent Alert Template
+                    </Typography>
+                    <Stack direction="row" spacing={0.5}>
+                      {['{STUDENT_NAME}', '{CLASS}', '{DATE}'].map((tag) => (
+                        <Chip
+                          key={tag}
+                          label={tag}
+                          size="small"
+                          clickable
+                          onClick={() => appendTag('smsTemplateAbsent', tag)}
+                          sx={{ fontSize: '0.65rem', height: 20 }}
+                        />
+                      ))}
+                    </Stack>
+                  </Stack>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    size="small"
+                    value={config.smsTemplateAbsent || ''}
+                    onChange={(e) => setConfig({ ...config, smsTemplateAbsent: e.target.value })}
+                  />
+                </Box>
+              </Stack>
+
+              {/* Gmail / Resend Email Alerts Box */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2.5,
+                  borderRadius: 2.5,
+                  bgcolor: '#f0fdf4',
+                  border: '1px solid #bbf7d0'
+                }}
+              >
+                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} sx={{ mb: 2 }}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#166534' }}>
+                      📧 Gmail & Cloud Parent Email Alerts
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: '#15803d' }}>
+                      Sends instant HTML attendance report cards directly to parent inboxes.
+                    </Typography>
+                  </Box>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={config.emailNotificationsEnabled !== false}
+                        onChange={(e) => setConfig({ ...config, emailNotificationsEnabled: e.target.checked })}
+                        color="success"
+                      />
+                    }
+                    label={<Typography variant="caption" sx={{ fontWeight: 700, color: '#166534' }}>Email Alerts Enabled</Typography>}
+                  />
+                </Stack>
+
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="email"
+                      label="Sender Gmail User"
+                      value={config.smtpUser || ''}
+                      onChange={(e) => setConfig({ ...config, smtpUser: e.target.value })}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="password"
+                      label="Google App Password"
+                      value={config.smtpPass || ''}
+                      onChange={(e) => setConfig({ ...config, smtpPass: e.target.value })}
+                      InputProps={{ sx: { fontFamily: 'monospace' } }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Sender Display Name"
+                      value={config.emailFromName || 'RFID ATTENDANCE'}
+                      onChange={(e) => setConfig({ ...config, emailFromName: e.target.value })}
+                    />
+                  </Grid>
+                </Grid>
+
+                {/* Test Email Dispatcher */}
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} alignItems="center" sx={{ mt: 2, pt: 1.5, borderTop: '1px solid #dcfce7' }}>
+                  <TextField
+                    size="small"
+                    placeholder="Enter test email address"
+                    value={testEmailTarget}
+                    onChange={(e) => setTestEmailTarget(e.target.value)}
+                    sx={{ width: { xs: '100%', sm: 260 } }}
+                  />
+                  <Button
+                    variant="contained"
+                    color="success"
+                    size="small"
+                    disabled={testEmailLoading}
+                    onClick={handleSendTestEmail}
+                    startIcon={<SendIcon />}
+                    sx={{ width: { xs: '100%', sm: 'auto' }, height: 38 }}
+                  >
+                    {testEmailLoading ? 'Sending...' : 'Send Test Email'}
+                  </Button>
+                  {testEmailStatus && (
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 700,
+                        color: testEmailStatus.success ? 'success.dark' : 'error.main'
+                      }}
+                    >
+                      {testEmailStatus.success ? '✓ ' + testEmailStatus.message : '✗ ' + testEmailStatus.message}
+                    </Typography>
+                  )}
+                </Stack>
+              </Paper>
+
+              <Button
+                type="submit"
+                variant="contained"
+                size="large"
+                disabled={saving}
+                startIcon={<SaveIcon />}
+                sx={{ py: 1.3, fontWeight: 700 }}
+              >
+                {saving ? 'Saving...' : 'Save Settings to MongoDB Atlas'}
+              </Button>
+            </Stack>
+          </Box>
+        </Paper>
+      </Grid>
+
+      {/* Right Column: Actions & Device Key */}
+      <Grid item xs={12} lg={4}>
+        <Stack spacing={2.5}>
+          {/* Manual Cron Trigger Card */}
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <BoltIcon sx={{ color: 'warning.main', fontSize: 20 }} /> Manual Report Trigger
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem', mb: 2 }}>
+              Automated in the background via cron. You can trigger reports manually anytime:
+            </Typography>
+
+            <Stack spacing={1.5}>
+              <Button
+                fullWidth
+                variant="outlined"
+                color="inherit"
+                disabled={actionLoading}
+                onClick={handleTriggerDaily}
+                sx={{ borderColor: 'divider', textTransform: 'none', py: 1 }}
+              >
+                📲 Run Daily Cutoff & Dispatch Reports
+              </Button>
+
+              <Button
+                fullWidth
+                variant="outlined"
+                color="inherit"
+                disabled={actionLoading}
+                onClick={handleTriggerMonthly}
+                sx={{ borderColor: 'divider', textTransform: 'none', py: 1 }}
+              >
+                📅 Dispatch Monthly Reports Now
+              </Button>
+            </Stack>
+          </Paper>
+
+          {/* Device Authentication */}
+          <Paper elevation={0} sx={{ p: 2.5, borderRadius: 3 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <KeyIcon sx={{ color: 'primary.main', fontSize: 20 }} /> Device Authentication
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mb: 0.5 }}>
+              Hardware Security Key:
+            </Typography>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 1.25,
+                bgcolor: '#f1f5f9',
+                borderRadius: 2,
+                fontFamily: 'monospace',
+                fontWeight: 700,
+                fontSize: '0.85rem'
+              }}
+            >
               {config.deviceApiKey || 'SCHOOL_ATTENDANCE_SECRET_2026'}
-            </code>
-            <p style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>
-              Used by ESP32 firmware in <code>api_key</code> field to authorize scans.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Paper>
+            <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', mt: 1 }}>
+              Used by ESP32 firmware in <code>DEVICE_API_KEY</code> to authenticate card scans.
+            </Typography>
+          </Paper>
+        </Stack>
+      </Grid>
+    </Grid>
   );
 }
