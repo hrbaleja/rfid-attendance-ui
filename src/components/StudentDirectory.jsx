@@ -28,7 +28,6 @@ import {
 } from '@mui/material';
 import {
   PersonAdd as PersonAddIcon,
-  UploadFile as UploadFileIcon,
   DeleteForever as DeleteIcon,
   Search as SearchIcon,
   School as SchoolIcon,
@@ -40,7 +39,6 @@ export default function StudentDirectory() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const [newStudent, setNewStudent] = useState({
     grNo: '',
@@ -53,9 +51,6 @@ export default function StudentDirectory() {
     parentPhone: '',
     parentEmail: ''
   });
-
-  const [csvText, setCsvText] = useState('');
-  const [bulkStatus, setBulkStatus] = useState(null);
 
   useEffect(() => {
     fetchStudents();
@@ -110,48 +105,6 @@ export default function StudentDirectory() {
     }
   };
 
-  const handleBulkUpload = async () => {
-    if (!csvText.trim()) return alert('Please paste CSV rows');
-    const lines = csvText.trim().split('\n');
-    const parsedStudents = [];
-
-    lines.forEach((line) => {
-      const parts = line.split(',').map((s) => s.trim().replace(/^"|"$/g, ''));
-      if (parts.length >= 5) {
-        parsedStudents.push({
-          grNo: parts[0],
-          rollNo: parts[1] || '1',
-          rfidUid: parts[2],
-          fullName: parts[3],
-          className: parts[4],
-          gender: parts[5] || 'Boy',
-          parentName: parts[6] || 'Parent',
-          parentPhone: parts[7] || '',
-          parentEmail: parts[8] || ''
-        });
-      }
-    });
-
-    if (parsedStudents.length === 0) {
-      return alert('No valid CSV rows parsed. Check column format.');
-    }
-
-    try {
-      setBulkStatus('Importing ' + parsedStudents.length + ' students...');
-      const res = await api.post('/api/students/bulk', { students: parsedStudents });
-      if (res.data.success) {
-        alert(`Successfully imported ${res.data.count || parsedStudents.length} students!`);
-        setIsBulkModalOpen(false);
-        setCsvText('');
-        setBulkStatus(null);
-        fetchStudents();
-      }
-    } catch (e) {
-      alert('Bulk import failed: ' + e.message);
-      setBulkStatus(null);
-    }
-  };
-
   const filtered = students.filter((s) => {
     const term = search.toLowerCase();
     return (
@@ -167,29 +120,32 @@ export default function StudentDirectory() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
       {/* Header & Right-Aligned Action Bar */}
       <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, width: '100%' }}>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
-          alignItems={{ xs: 'stretch', md: 'center' }}
-          justifyContent="space-between"
-          sx={{ width: '100%' }}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'stretch', md: 'center' },
+            justifyContent: 'space-between',
+            gap: 2,
+            width: '100%'
+          }}
         >
-          {/* Left: Title & Subtitle */}
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <SchoolIcon sx={{ color: 'primary.main' }} /> Student Directory
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
-              Manage active students, RFID card mappings, and parent alert channels ({filtered.length} total)
-            </Typography>
-          </Box>
+          {/* Left: Title */}
+          <Typography variant="h6" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SchoolIcon sx={{ color: 'primary.main' }} /> Student Directory
+          </Typography>
 
-          {/* Right Side: Search, Bulk Import & Add Student Buttons */}
+          {/* Right Side: Search & Add Student Button */}
           <Stack
-            direction={{ xs: 'column', sm: 'row' }}
+            direction="row"
             spacing={1.5}
             alignItems="center"
-            sx={{ ml: { md: 'auto' } }}
+            sx={{
+              ml: 'auto',
+              width: { xs: '100%', sm: 'auto' },
+              justifyContent: { xs: 'stretch', sm: 'flex-end' },
+              flexShrink: 0
+            }}
           >
             <TextField
               size="small"
@@ -203,30 +159,26 @@ export default function StudentDirectory() {
                   </InputAdornment>
                 )
               }}
-              sx={{ width: { xs: '100%', sm: 200 } }}
+              sx={{ width: { xs: '100%', sm: 220 }, '& .MuiInputBase-root': { height: 40 } }}
             />
-
-            <Button
-              variant="outlined"
-              color="primary"
-              startIcon={<UploadFileIcon />}
-              onClick={() => setIsBulkModalOpen(true)}
-              sx={{ width: { xs: '100%', sm: 'auto' }, height: 40, whiteSpace: 'nowrap' }}
-            >
-              Bulk Import
-            </Button>
 
             <Button
               variant="contained"
               color="primary"
               startIcon={<PersonAddIcon />}
               onClick={() => setIsAddModalOpen(true)}
-              sx={{ width: { xs: '100%', sm: 'auto' }, height: 40, whiteSpace: 'nowrap', fontWeight: 700 }}
+              sx={{
+                height: 40,
+                px: 2.5,
+                whiteSpace: 'nowrap',
+                fontWeight: 700,
+                flexShrink: 0
+              }}
             >
               Add Student
             </Button>
           </Stack>
-        </Stack>
+        </Box>
       </Paper>
 
       {/* Students Data Table */}
@@ -427,54 +379,6 @@ export default function StudentDirectory() {
             </Button>
           </DialogActions>
         </Box>
-      </Dialog>
-
-      {/* Bulk Import Dialog */}
-      <Dialog
-        open={isBulkModalOpen}
-        onClose={() => setIsBulkModalOpen(false)}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{ sx: { borderRadius: 3 } }}
-      >
-        <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            Bulk Student CSV Import
-          </Typography>
-          <IconButton onClick={() => setIsBulkModalOpen(false)} size="small">
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent dividers>
-          <Typography variant="body2" sx={{ color: 'text.secondary', mb: 1.5 }}>
-            Paste CSV rows with the following column structure:
-            <code style={{ display: 'block', marginTop: '6px', fontWeight: 700 }}>
-              GR_No, Roll_No, RFID_UID, Full_Name, Class, Gender, Parent_Name, Parent_Mobile, Parent_Email
-            </code>
-          </Typography>
-
-          <TextField
-            fullWidth
-            multiline
-            rows={8}
-            placeholder={`GR101,1,A1B2C3D4,Aarav Patel,9A,Boy,Ramesh Patel,9876543210,parent@gmail.com\nGR102,2,B2C3D4E5,Diya Sharma,9A,Girl,Sanjay Sharma,9876543211,diya.parent@gmail.com`}
-            value={csvText}
-            onChange={(e) => setCsvText(e.target.value)}
-            InputProps={{ sx: { fontFamily: 'monospace', fontSize: '0.85rem' } }}
-          />
-
-          {bulkStatus && (
-            <Typography variant="body2" sx={{ color: 'primary.main', fontWeight: 600, mt: 1 }}>
-              {bulkStatus}
-            </Typography>
-          )}
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setIsBulkModalOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleBulkUpload}>
-            Import Students
-          </Button>
-        </DialogActions>
       </Dialog>
     </Box>
   );
