@@ -91,11 +91,10 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
                 color: 'primary.main',
                 width: { xs: 42, sm: 48 },
                 height: { xs: 42, sm: 48 },
-                fontSize: { xs: '1.25rem', sm: '1.5rem' },
                 borderRadius: 2.5
               }}
             >
-              🏫
+              <SchoolIcon sx={{ fontSize: { xs: '1.4rem', sm: '1.6rem' } }} />
             </Avatar>
             <Box>
               <Typography
