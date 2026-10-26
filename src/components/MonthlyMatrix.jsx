@@ -79,19 +79,36 @@ export default function MonthlyMatrix({
     document.body.removeChild(link);
   };
 
+  const availableClasses = Array.from(
+    new Set([
+      '9A',
+      '10A',
+      ...matrix.map((r) => r.className).filter(Boolean)
+    ])
+  ).sort();
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
       {/* Month & Class Controls Bar */}
       <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, width: '100%' }}>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
-          alignItems={{ xs: 'stretch', md: 'center' }}
-          justifyContent="space-between"
-          sx={{ width: '100%' }}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'stretch', md: 'center' },
+            justifyContent: 'space-between',
+            gap: 2,
+            width: '100%'
+          }}
         >
-          {/* Left Side: Month & Class Selectors */}
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+          {/* Left Side: Filters (Month, Class, Search) - All aligned at 40px height */}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignItems={{ xs: 'stretch', sm: 'center' }}
+            flexWrap="wrap"
+            sx={{ gap: { xs: 1.5, sm: 1.5 } }}
+          >
             <TextField
               type="month"
               size="small"
@@ -106,36 +123,39 @@ export default function MonthlyMatrix({
                   </InputAdornment>
                 )
               }}
-              sx={{ width: { xs: '100%', sm: 200 } }}
+              sx={{ width: { xs: '100%', sm: 180 }, '& .MuiInputBase-root': { height: 40 } }}
             />
 
-            <FormControl size="small" sx={{ width: { xs: '100%', sm: 160 } }}>
+            <FormControl size="small" sx={{ width: { xs: '100%', sm: 165 }, minWidth: 150 }}>
               <InputLabel id="class-select">Class</InputLabel>
               <Select
                 labelId="class-select"
-                value={selectedClass}
+                value={selectedClass || ''}
                 label="Class"
+                displayEmpty
                 onChange={(e) => setSelectedClass(e.target.value)}
+                renderValue={(val) => {
+                  if (!val) return 'All Classes';
+                  return val.startsWith('Class') ? val : `Class ${val}`;
+                }}
                 startAdornment={
                   <InputAdornment position="start">
                     <FilterIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
                   </InputAdornment>
                 }
+                sx={{ height: 40 }}
               >
-                <MenuItem value="">All Classes</MenuItem>
-                <MenuItem value="9A">Class 9A</MenuItem>
-                <MenuItem value="10A">Class 10A</MenuItem>
+                <MenuItem value="">
+                  <em>All Classes</em>
+                </MenuItem>
+                {availableClasses.map((cls) => (
+                  <MenuItem key={cls} value={cls}>
+                    Class {cls}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
-          </Stack>
 
-          {/* Right Side: Search & Download Button (Proper Right Aligned) */}
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1.5}
-            alignItems="center"
-            sx={{ ml: { md: 'auto' } }}
-          >
             <TextField
               size="small"
               placeholder="Search student..."
@@ -148,9 +168,22 @@ export default function MonthlyMatrix({
                   </InputAdornment>
                 )
               }}
-              sx={{ width: { xs: '100%', sm: 220 } }}
+              sx={{ width: { xs: '100%', sm: 220 }, '& .MuiInputBase-root': { height: 40 } }}
             />
+          </Stack>
 
+          {/* Right Side: Download Button (Proper Right Aligned) */}
+          <Stack
+            direction="row"
+            spacing={1.5}
+            alignItems="center"
+            sx={{
+              ml: { md: 'auto' },
+              width: { xs: '100%', sm: 'auto' },
+              justifyContent: { xs: 'stretch', sm: 'flex-end' },
+              flexShrink: 0
+            }}
+          >
             <Button
               variant="contained"
               color="primary"
@@ -159,7 +192,7 @@ export default function MonthlyMatrix({
               sx={{
                 width: { xs: '100%', sm: 'auto' },
                 height: 40,
-                px: 2.25,
+                px: 2.5,
                 fontWeight: 700,
                 whiteSpace: 'nowrap'
               }}
@@ -167,7 +200,7 @@ export default function MonthlyMatrix({
               Export Monthly CSV
             </Button>
           </Stack>
-        </Stack>
+        </Box>
       </Paper>
 
       {/* Monthly Attendance Spreadsheet Table */}

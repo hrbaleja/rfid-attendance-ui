@@ -168,19 +168,36 @@ export default function DailyAttendance({
     );
   };
 
+  const availableClasses = Array.from(
+    new Set([
+      '9A',
+      '10A',
+      ...(dailyData?.records || []).map((r) => r.className).filter(Boolean)
+    ])
+  ).sort();
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
       {/* Full-Width Filter and Action Bar */}
       <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, width: '100%' }}>
-        <Stack
-          direction={{ xs: 'column', lg: 'row' }}
-          spacing={2}
-          alignItems={{ xs: 'stretch', lg: 'center' }}
-          justifyContent="space-between"
-          sx={{ width: '100%' }}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: { xs: 'stretch', md: 'center' },
+            justifyContent: 'space-between',
+            gap: 2,
+            width: '100%'
+          }}
         >
-          {/* Left: Date & Class Selectors */}
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
+          {/* Left: Filters (Date, Class, Search) - All aligned at 40px height */}
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1.5}
+            alignItems={{ xs: 'stretch', sm: 'center' }}
+            flexWrap="wrap"
+            sx={{ gap: { xs: 1.5, sm: 1.5 } }}
+          >
             <TextField
               type="date"
               size="small"
@@ -195,36 +212,39 @@ export default function DailyAttendance({
                   </InputAdornment>
                 )
               }}
-              sx={{ width: { xs: '100%', sm: 200 } }}
+              sx={{ width: { xs: '100%', sm: 180 }, '& .MuiInputBase-root': { height: 40 } }}
             />
 
-            <FormControl size="small" sx={{ width: { xs: '100%', sm: 160 } }}>
+            <FormControl size="small" sx={{ width: { xs: '100%', sm: 165 }, minWidth: 150 }}>
               <InputLabel id="class-select-label">Class</InputLabel>
               <Select
                 labelId="class-select-label"
-                value={selectedClass}
+                value={selectedClass || ''}
                 label="Class"
+                displayEmpty
                 onChange={(e) => setSelectedClass(e.target.value)}
+                renderValue={(val) => {
+                  if (!val) return 'All Classes';
+                  return val.startsWith('Class') ? val : `Class ${val}`;
+                }}
                 startAdornment={
                   <InputAdornment position="start">
                     <FilterIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
                   </InputAdornment>
                 }
+                sx={{ height: 40 }}
               >
-                <MenuItem value="">All Classes</MenuItem>
-                <MenuItem value="9A">Class 9A</MenuItem>
-                <MenuItem value="10A">Class 10A</MenuItem>
+                <MenuItem value="">
+                  <em>All Classes</em>
+                </MenuItem>
+                {availableClasses.map((cls) => (
+                  <MenuItem key={cls} value={cls}>
+                    Class {cls}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
-          </Stack>
 
-          {/* Right: Search, Export & Clear Actions */}
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={1.5}
-            alignItems="center"
-            sx={{ ml: { lg: 'auto' } }}
-          >
             <TextField
               size="small"
               placeholder="Search student, GR..."
@@ -237,15 +257,35 @@ export default function DailyAttendance({
                   </InputAdornment>
                 )
               }}
-              sx={{ width: { xs: '100%', sm: 220 } }}
+              sx={{ width: { xs: '100%', sm: 220 }, '& .MuiInputBase-root': { height: 40 } }}
             />
+          </Stack>
 
+          {/* Right: Actions (Export CSV & Clear Day Data) - Perfectly aligned on right side */}
+          <Stack
+            direction="row"
+            spacing={1.5}
+            alignItems="center"
+            sx={{
+              ml: { md: 'auto' },
+              width: { xs: '100%', sm: 'auto' },
+              justifyContent: { xs: 'stretch', sm: 'flex-end' },
+              flexShrink: 0
+            }}
+          >
             <Button
               variant="outlined"
               color="inherit"
               startIcon={<DownloadIcon />}
               onClick={exportCSV}
-              sx={{ width: { xs: '100%', sm: 'auto' }, borderColor: 'divider', height: 40 }}
+              sx={{
+                flex: { xs: 1, sm: 'none' },
+                height: 40,
+                px: 2,
+                borderColor: 'divider',
+                whiteSpace: 'nowrap',
+                fontWeight: 600
+              }}
             >
               Export CSV
             </Button>
@@ -257,18 +297,21 @@ export default function DailyAttendance({
               onClick={handleClearDayAttendance}
               disabled={clearing}
               sx={{
-                width: { xs: '100%', sm: 'auto' },
+                flex: { xs: 1, sm: 'none' },
+                height: 40,
+                px: 2,
                 bgcolor: '#fff1f2',
                 color: '#e11d48',
                 border: '1px solid #fecdd3',
-                height: 40,
+                whiteSpace: 'nowrap',
+                fontWeight: 600,
                 '&:hover': { bgcolor: '#ffe4e6' }
               }}
             >
-              {clearing ? 'Clearing...' : 'Clear Day (Testing)'}
+              {clearing ? 'Clearing...' : 'Clear Day Data'}
             </Button>
           </Stack>
-        </Stack>
+        </Box>
       </Paper>
 
       {/* 4 Full-Width Metric Cards */}
