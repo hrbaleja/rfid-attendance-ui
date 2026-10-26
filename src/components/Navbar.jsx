@@ -107,10 +107,9 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
                   lineHeight: 1.2
                 }}
               >
-                RFID Attendance Alert System
-              </Typography>
+                {schoolName || 'Smart School RFID Gate & Parent Alert Dashboard'}              </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem', mt: 0.3 }}>
-                {schoolName || 'Smart School RFID Gate & Parent Alert Dashboard'}
+                RFID Attendance Alert System
               </Typography>
             </Box>
           </Box>
