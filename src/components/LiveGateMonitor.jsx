@@ -1,9 +1,33 @@
 import React, { useState } from 'react';
-import { Radio, ShieldCheck, Clock, CheckCircle2, AlertTriangle, Volume2, VolumeX, Smartphone } from 'lucide-react';
-import { API_BASE_URL } from '../api';
+import { Radio, ShieldCheck, Clock, CheckCircle2, AlertTriangle, Volume2, VolumeX, Smartphone, Trash2 } from 'lucide-react';
+import api, { API_BASE_URL } from '../api';
 
-export default function LiveGateMonitor({ liveScans, config }) {
+export default function LiveGateMonitor({ liveScans, config, onClearScans, onRefresh }) {
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [clearing, setClearing] = useState(false);
+
+  const handleClearTodayScans = async () => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const confirmPrompt = window.confirm(
+      `⚠️ Clear today's attendance records (${todayStr}) for testing?\n\n` +
+      `This will DELETE all scans recorded today so you can tap cards on your ESP32 reader and test again.`
+    );
+    if (!confirmPrompt) return;
+
+    setClearing(true);
+    try {
+      const res = await api.post('/api/attendance/clear-day', { date: todayStr });
+      if (res.data.success) {
+        alert(res.data.message);
+        if (onClearScans) onClearScans();
+        if (onRefresh) onRefresh();
+      }
+    } catch (err) {
+      alert(`Error clearing attendance: ${err.message}`);
+    } finally {
+      setClearing(false);
+    }
+  };
 
   const playBeep = () => {
     if (!soundEnabled) return;
@@ -155,6 +179,36 @@ export default function LiveGateMonitor({ liveScans, config }) {
             <div style={{ marginTop: '4px' }}>• <code>E1F2A3B4</code>: Aarav Patel (9A)</div>
             <div>• <code>A1B2C3D4</code>: Diya Sharma (9A)</div>
             <div>• <code>C5D6E7F8</code>: Rohan Verma (9A)</div>
+          </div>
+
+          <div style={{ marginTop: '16px', borderTop: '1px solid #f1f5f9', paddingTop: '14px' }}>
+            <button
+              onClick={handleClearTodayScans}
+              disabled={clearing}
+              style={{
+                width: '100%',
+                backgroundColor: '#fff1f2',
+                color: '#e11d48',
+                border: '1px solid #fecdd3',
+                padding: '10px 12px',
+                borderRadius: '8px',
+                fontSize: '12.5px',
+                fontWeight: '700',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                cursor: clearing ? 'not-allowed' : 'pointer',
+                opacity: clearing ? 0.7 : 1,
+                transition: 'all 0.2s'
+              }}
+            >
+              <Trash2 size={15} />
+              {clearing ? 'Clearing Scans...' : "Clear Today's Attendance (Testing)"}
+            </button>
+            <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '6px', textAlign: 'center' }}>
+              Reset today's logs to test cards multiple times
+            </p>
           </div>
         </div>
       </div>

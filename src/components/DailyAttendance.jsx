@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
-import { Download, Search, Filter, Calendar as CalendarIcon, Mail, Phone } from 'lucide-react';
+import { Download, Search, Filter, Calendar as CalendarIcon, Mail, Phone, Trash2 } from 'lucide-react';
+import api from '../api';
 
-export default function DailyAttendance({ dailyData, selectedDate, setSelectedDate, selectedClass, setSelectedClass }) {
+export default function DailyAttendance({
+  dailyData,
+  selectedDate,
+  setSelectedDate,
+  selectedClass,
+  setSelectedClass,
+  onRefresh
+}) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [clearing, setClearing] = useState(false);
 
   const stats = dailyData?.stats || {
     totalLogged: 0,
@@ -54,6 +63,29 @@ export default function DailyAttendance({ dailyData, selectedDate, setSelectedDa
     document.body.removeChild(link);
   };
 
+  const handleClearDayAttendance = async () => {
+    const totalCount = stats.totalLogged || 0;
+    const confirmPrompt = window.confirm(
+      `⚠️ Clear Attendance for ${selectedDate}?\n\n` +
+      `Currently recorded: ${totalCount} record(s).\n\n` +
+      `This will DELETE all attendance records for ${selectedDate} so you can perform fresh RFID test scans with your ESP32 hardware.`
+    );
+    if (!confirmPrompt) return;
+
+    setClearing(true);
+    try {
+      const res = await api.post('/api/attendance/clear-day', { date: selectedDate });
+      if (res.data.success) {
+        alert(res.data.message);
+        if (onRefresh) onRefresh();
+      }
+    } catch (err) {
+      alert(`Error clearing attendance: ${err.message}`);
+    } finally {
+      setClearing(false);
+    }
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Filter and Export Bar */}
@@ -103,6 +135,30 @@ export default function DailyAttendance({ dailyData, selectedDate, setSelectedDa
             }}
           >
             <Download size={15} /> Export CSV
+          </button>
+
+          <button
+            onClick={handleClearDayAttendance}
+            disabled={clearing}
+            title={`Clear attendance for ${selectedDate} to test fresh RFID card scans`}
+            style={{
+              backgroundColor: '#fff1f2',
+              color: '#e11d48',
+              border: '1px solid #fecdd3',
+              padding: '8px 14px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: clearing ? 'not-allowed' : 'pointer',
+              opacity: clearing ? 0.7 : 1,
+              transition: 'all 0.2s'
+            }}
+          >
+            <Trash2 size={15} />
+            {clearing ? 'Clearing...' : 'Clear Day (Testing)'}
           </button>
         </div>
       </div>

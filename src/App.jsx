@@ -43,14 +43,24 @@ function Dashboard() {
       fetchDailyAttendance();
     };
 
+    const onAttendanceCleared = (payload) => {
+      fetchDailyAttendance();
+      const todayStr = new Date().toISOString().slice(0, 10);
+      if (payload?.date === todayStr) {
+        setLiveScans([]);
+      }
+    };
+
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('NEW_ATTENDANCE_SCAN', onScan);
+    socket.on('ATTENDANCE_CLEARED', onAttendanceCleared);
 
     return () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
       socket.off('NEW_ATTENDANCE_SCAN', onScan);
+      socket.off('ATTENDANCE_CLEARED', onAttendanceCleared);
     };
   }, [isAuthenticated]);
 
@@ -118,7 +128,12 @@ function Dashboard() {
       {/* Main Tab Content */}
       <main>
         {activeTab === 'live' && (
-          <LiveGateMonitor liveScans={liveScans} config={config} />
+          <LiveGateMonitor
+            liveScans={liveScans}
+            config={config}
+            onClearScans={() => setLiveScans([])}
+            onRefresh={fetchDailyAttendance}
+          />
         )}
 
         {activeTab === 'enroll' && (
@@ -132,6 +147,7 @@ function Dashboard() {
             setSelectedDate={setSelectedDate}
             selectedClass={selectedClass}
             setSelectedClass={setSelectedClass}
+            onRefresh={fetchDailyAttendance}
           />
         )}
 

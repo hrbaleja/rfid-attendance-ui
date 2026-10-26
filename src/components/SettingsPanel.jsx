@@ -6,7 +6,7 @@ export default function SettingsPanel({ config, setConfig, onRefresh }) {
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [testEmailLoading, setTestEmailLoading] = useState(false);
-  const [testEmailTarget, setTestEmailTarget] = useState('admin@bgroup.com');
+  const [testEmailTarget, setTestEmailTarget] = useState('');
   const [testEmailStatus, setTestEmailStatus] = useState(null);
 
   const handleSave = async (e) => {

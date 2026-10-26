@@ -54,11 +54,11 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
             🏫
           </div>
           <div>
-            <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a' }}>
-              {schoolName || 'Sardar Patel Vidyalaya'}
+            <h1 style={{ fontSize: '19px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.3px' }}>
+              RFID Attendance Alert System
             </h1>
-            <p style={{ fontSize: '13px', color: '#64748b' }}>
-              RFID Gate Attendance & SMS Reporting System
+            <p style={{ fontSize: '12.5px', color: '#64748b' }}>
+              {schoolName || 'Smart School RFID Gate & Parent Alert Dashboard'}
             </p>
           </div>
         </div>
@@ -125,7 +125,7 @@ export default function Navbar({ activeTab, setActiveTab, isConnected, schoolNam
                 {user?.name || 'Administrator'}
               </span>
               <span style={{ fontSize: '11px', color: '#64748b' }}>
-                {user?.email || 'admin@bgroup.com'}
+                {user?.email || ''}
               </span>
             </div>
 

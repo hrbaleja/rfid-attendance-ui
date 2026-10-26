@@ -4,8 +4,8 @@ import { Lock, Mail, Key, ShieldCheck, Eye, EyeOff, AlertCircle, ArrowRight } fr
 
 export default function LoginView() {
   const { login } = useAuth();
-  const [email, setEmail] = useState('admin@bgroup.com');
-  const [password, setPassword] = useState('123Bgroup@');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -101,7 +101,7 @@ export default function LoginView() {
             <Lock size={26} />
           </div>
           <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', letterSpacing: '-0.5px' }}>
-            RFID Attendance Portal
+            RFID Attendance Alert System
           </h1>
           <p style={{ fontSize: '13.5px', color: '#64748b', marginTop: '6px' }}>
             Sign in with your administrator credentials
@@ -145,7 +145,7 @@ export default function LoginView() {
               <input
                 type="email"
                 required
-                placeholder="admin@bgroup.com"
+                placeholder="admin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 style={{
