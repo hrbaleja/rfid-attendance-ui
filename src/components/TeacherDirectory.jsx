@@ -23,6 +23,7 @@ import {
 import {
   Badge as BadgeIcon,
   Add as AddIcon,
+  Edit as EditIcon,
   DeleteForever as DeleteIcon,
   Close as CloseIcon
 } from '@mui/icons-material';
@@ -31,6 +32,7 @@ export default function TeacherDirectory() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTeacher, setEditingTeacher] = useState(null);
   const [form, setForm] = useState({
     className: '',
     teacherName: '',
@@ -56,18 +58,46 @@ export default function TeacherDirectory() {
     }
   };
 
+  const handleOpenAddModal = () => {
+    setEditingTeacher(null);
+    setForm({ className: '', teacherName: '', phone: '', email: '' });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (teacher) => {
+    setEditingTeacher(teacher);
+    setForm({
+      className: teacher.className || '',
+      teacherName: teacher.teacherName || '',
+      phone: teacher.phone || '',
+      email: teacher.email || ''
+    });
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post('/api/teachers', form);
-      if (res.data.success) {
-        alert(res.data.message);
-        setIsModalOpen(false);
-        setForm({ className: '', teacherName: '', phone: '', email: '' });
-        fetchTeachers();
+      if (editingTeacher) {
+        const res = await api.put(`/api/teachers/${editingTeacher._id}`, form);
+        if (res.data.success) {
+          alert(res.data.message || 'Teacher assignment updated successfully!');
+          setIsModalOpen(false);
+          setEditingTeacher(null);
+          setForm({ className: '', teacherName: '', phone: '', email: '' });
+          fetchTeachers();
+        }
+      } else {
+        const res = await api.post('/api/teachers', form);
+        if (res.data.success) {
+          alert(res.data.message || 'Class teacher assigned successfully!');
+          setIsModalOpen(false);
+          setForm({ className: '', teacherName: '', phone: '', email: '' });
+          fetchTeachers();
+        }
       }
     } catch (err) {
-      alert(err.message);
+      alert(err.response?.data?.message || err.message);
     }
   };
 
@@ -77,7 +107,7 @@ export default function TeacherDirectory() {
       await api.delete(`/api/teachers/${id}`);
       fetchTeachers();
     } catch (e) {
-      alert(e.message);
+      alert(e.response?.data?.message || e.message);
     }
   };
 
@@ -85,12 +115,15 @@ export default function TeacherDirectory() {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%' }}>
       {/* Header Card with Right-Aligned Action Button */}
       <Paper elevation={0} sx={{ p: { xs: 2, sm: 2.5 }, borderRadius: 3, width: '100%' }}>
-        <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          spacing={2}
-          alignItems={{ xs: 'flex-start', sm: 'center' }}
-          justifyContent="space-between"
-          sx={{ width: '100%' }}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            justifyContent: 'space-between',
+            gap: 2,
+            width: '100%'
+          }}
         >
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 800, display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -105,18 +138,20 @@ export default function TeacherDirectory() {
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => setIsModalOpen(true)}
+            onClick={handleOpenAddModal}
             sx={{
-              ml: { sm: 'auto' },
+              ml: 'auto',
               width: { xs: '100%', sm: 'auto' },
               height: 40,
               fontWeight: 700,
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              px: 2.5,
+              flexShrink: 0
             }}
           >
             Add Class Teacher
           </Button>
-        </Stack>
+        </Box>
       </Paper>
 
       {/* Teachers Table */}
@@ -157,15 +192,26 @@ export default function TeacherDirectory() {
                     <TableCell sx={{ fontFamily: 'monospace', fontWeight: 600 }}>{t.phone}</TableCell>
                     <TableCell>{t.email || '-'}</TableCell>
                     <TableCell align="right" sx={{ pr: 3 }}>
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDelete(t._id, t.className)}
-                        title="Delete Teacher"
-                        sx={{ bgcolor: '#fff1f2', '&:hover': { bgcolor: '#ffe4e6' } }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                      <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleOpenEditModal(t)}
+                          title="Edit Teacher"
+                          sx={{ bgcolor: '#eff6ff', '&:hover': { bgcolor: '#dbeafe' } }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDelete(t._id, t.className)}
+                          title="Delete Teacher"
+                          sx={{ bgcolor: '#fff1f2', '&:hover': { bgcolor: '#ffe4e6' } }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 ))
@@ -175,7 +221,7 @@ export default function TeacherDirectory() {
         </TableContainer>
       </Paper>
 
-      {/* Assign Teacher Dialog */}
+      {/* Assign / Edit Teacher Dialog */}
       <Dialog
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -185,7 +231,7 @@ export default function TeacherDirectory() {
       >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            Assign Class Teacher
+            {editingTeacher ? 'Edit Class Teacher' : 'Assign Class Teacher'}
           </Typography>
           <IconButton onClick={() => setIsModalOpen(false)} size="small">
             <CloseIcon />
@@ -238,7 +284,7 @@ export default function TeacherDirectory() {
           <DialogActions sx={{ p: 2 }}>
             <Button onClick={() => setIsModalOpen(false)}>Cancel</Button>
             <Button type="submit" variant="contained">
-              Save Assignment
+              {editingTeacher ? 'Update Teacher' : 'Save Assignment'}
             </Button>
           </DialogActions>
         </Box>
